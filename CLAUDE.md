@@ -7,10 +7,10 @@ Full-stack esports club website — Next.js 14 App Router + Supabase (DB/Auth/St
 
 ## Key Commands
 ```bash
-pnpm dev          # Start dev server (localhost:3000)
-pnpm build        # Production build
-pnpm lint         # ESLint check
-pnpm typecheck    # TypeScript check
+npm run dev       # Start dev server (localhost:3000)
+npm run build     # Production build
+npm run lint      # ESLint check
+npm run typecheck # TypeScript check
 supabase start    # Start local Supabase (requires Docker)
 supabase db push  # Push schema migrations to remote
 supabase db reset # Wipe local DB, reapply migrations + seed.sql
@@ -104,6 +104,33 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=    # server-side only, never expose to browser
 NEXT_PUBLIC_SITE_URL=
 ```
+
+## Claude Code Workflow
+
+### Plan Mode
+Use Plan Mode before starting any phase or feature that touches more than two files. Type "use plan mode" or press Shift+Tab at the prompt to enter it. Exit with Shift+Tab again once the plan is approved.
+
+### Custom Slash Commands
+Project-specific commands defined in `.claude/commands/`:
+- `/gen-types` — regenerates `src/types/supabase.ts` from the local schema
+- `/phase-check` — runs typecheck + lint + build and outputs a ready-to-use commit command
+- `/db-reset` — resets the local Supabase DB (destructive — warns before running)
+
+### Built-in Skills
+- `/review` — triggers a multi-file code review of the current branch
+- `/security-review` — run before shipping Phase 11; checks RLS, auth flows, input validation
+- `/simplify` — reviews recently changed code for unnecessary complexity
+
+### Hooks (auto-configured in `.claude/settings.json`)
+A `PostToolUse` hook fires after every `Write` or `Edit` call. If the written file is inside `supabase/migrations/`, it prints a reminder to run `/gen-types`. This prevents type/schema drift mid-phase.
+
+### Context Management
+- Use `/compact` with a focus message when context grows long, e.g.: `/compact keep focus on Phase 3 home page`
+- Use `/rewind` to undo the last set of file changes if Claude goes off track
+- Prefix any shell command with `!` to run it directly: `! npm run dev`
+
+### Agent Usage
+For open-ended research within a session (e.g. "find all files that reference `team_roster`", "check which pages are missing `loading.tsx`"), ask Claude to spawn an Explore agent rather than doing it inline — keeps the main context window clean.
 
 ## Detailed Docs
 Read these before working on the corresponding feature:

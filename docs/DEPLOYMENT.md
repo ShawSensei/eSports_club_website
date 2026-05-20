@@ -35,14 +35,14 @@
 # Clone repo and install deps
 git clone [your-repo]
 cd esports-club
-pnpm install
+npm install
 
 # Create .env.local (never commit this file)
 cp .env.example .env.local
 # Fill in your Supabase values
 
 # Start dev server
-pnpm dev
+npm run dev
 ```
 
 **.env.example** (commit this, not .env.local):

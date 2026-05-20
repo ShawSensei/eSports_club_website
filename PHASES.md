@@ -15,7 +15,7 @@ Use Plan Mode (Shift+Tab twice) before each phase to review the plan before codi
 Read CLAUDE.md, docs/DATABASE.md, and docs/DEPLOYMENT.md.
 
 Set up the project:
-1. Initialize Next.js 14 with TypeScript, Tailwind CSS, App Router, pnpm
+1. Initialize Next.js 14 with TypeScript, Tailwind CSS, App Router, npm
 2. Install all dependencies from COMPONENTS.md (packages section)
 3. Create the full directory structure from PAGES.md
 4. Create src/lib/supabase/client.ts, server.ts, admin.ts
@@ -27,7 +27,7 @@ Set up the project:
 10. Set up next.config.js with image domains for Supabase storage
 ```
 
-**Done when**: `pnpm dev` runs, Supabase schema applied, types generated.
+**Done when**: `npm run dev` runs, Supabase schema applied, types generated.
 
 ---
 
@@ -248,23 +248,26 @@ Polish the project for production:
 4. Verify all loading.tsx skeletons exist
 5. Add mobile responsiveness pass — test all pages at 375px
 6. Verify all RLS policies are correct (try accessing data as different roles)
-7. Run pnpm build — fix all TypeScript errors
-8. Run pnpm lint — fix all ESLint warnings
+7. Run npm run build — fix all TypeScript errors
+8. Run npm run lint — fix all ESLint warnings
 9. Add /403 page for unauthorized access
 10. Verify environment variables are all in .env.example
 11. Update this PHASES.md marking all phases complete
 ```
 
-**Done when**: `pnpm build` passes clean, all pages work on mobile, RLS verified.
+**Done when**: `npm run build` passes clean, all pages work on mobile, RLS verified.
 
 ---
 
 ## Session Tips
 
 - **Always read CLAUDE.md at session start** — it loads all context
-- **Use Plan Mode first** (Shift+Tab twice) — review plan before Claude writes code
+- **Use Plan Mode first** — type "use plan mode" or press Shift+Tab before coding starts
 - **One phase per session** — don't mix features from different phases
-- **Commit after each phase**: `git commit -m "feat: phase [N] — [description]"`
-- **If Claude goes off track**: use `/rewind` to go back, don't try to fix bad output
-- **Running low on context**: use `/compact` with "keep focus on current phase"
-- **Type generation after schema changes**: run `supabase gen types typescript --local > src/types/supabase.ts`
+- **Commit after each phase**: run `/phase-check` then `git commit -m "feat: phase [N] — [description]"`
+- **If Claude goes off track**: use `/rewind` to undo the last changes, don't try to patch bad output
+- **Running low on context**: `/compact keep focus on Phase [N] — [feature]`
+- **Type generation after schema changes**: run `/gen-types` (or the full command manually)
+- **After phase complete**: run `/review` to catch issues before committing
+- **Before Phase 11 (production)**: run `/security-review` to verify RLS, auth flows, and input validation
+- **Direct shell commands**: prefix with `!` — e.g. `! supabase start`
