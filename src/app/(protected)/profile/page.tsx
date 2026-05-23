@@ -1,7 +1,19 @@
-// Redirects to /profile/[username] — built out in Phase 8.
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
-export default function ProfileRedirectPage() {
-  // Redirect logic added in Phase 8 once auth is wired.
-  redirect('/')
+export default async function ProfileRedirectPage() {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('id', user.id)
+    .single<{ username: string }>()
+
+  if (!profile?.username) redirect('/login')
+
+  redirect(`/profile/${profile.username}`)
 }

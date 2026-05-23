@@ -100,7 +100,7 @@ Enable Realtime on: `news_posts`, `matches`, `player_stats`, `tournaments`. Subs
 ## Environment Variables
 ```
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=    # server-side only, never expose to browser
 NEXT_PUBLIC_SITE_URL=
 ```

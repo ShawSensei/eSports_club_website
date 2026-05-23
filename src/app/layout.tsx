@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${orbitron.variable}`}>
-      <body>{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }

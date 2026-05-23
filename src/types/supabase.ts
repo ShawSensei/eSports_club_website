@@ -502,7 +502,7 @@ export interface Database {
     Functions: {
       increment_post_views: {
         Args: { post_id: string }
-        Returns: undefined
+        Returns: void
       }
       is_admin: {
         Args: Record<string, never>

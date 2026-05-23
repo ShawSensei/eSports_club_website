@@ -1,4 +1,21 @@
-// Protected layout — auth check enforced in middleware + here in Phase 2.
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
+
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/login')
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  )
 }
