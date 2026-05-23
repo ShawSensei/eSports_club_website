@@ -72,7 +72,7 @@ export default async function GameDetailPage({ params, searchParams }: PageParam
   if (tab === 'patch') {
     const { data } = await supabase
       .from('news_posts')
-      .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, view_count, games(name, slug), profiles(display_name, avatar_url)')
+      .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, views, games(name, slug), profiles(display_name, avatar_url)')
       .eq('is_published', true)
       .eq('game_id', game.id)
       .eq('category', 'patch')
@@ -84,7 +84,7 @@ export default async function GameDetailPage({ params, searchParams }: PageParam
   if (tab === 'strategy') {
     const { data } = await supabase
       .from('news_posts')
-      .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, view_count, games(name, slug), profiles(display_name, avatar_url)')
+      .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, views, games(name, slug), profiles(display_name, avatar_url)')
       .eq('is_published', true)
       .eq('game_id', game.id)
       .eq('category', 'strategy')

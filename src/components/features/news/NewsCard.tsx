@@ -14,7 +14,7 @@ export type NewsCardData = {
   category: string
   published_at: string | null
   is_pinned: boolean
-  view_count: number
+  views: number
   games: { name: string; slug: string } | null
   profiles: { display_name: string | null; avatar_url: string | null } | null
 }
@@ -72,7 +72,7 @@ export function NewsCard({ post }: { post: NewsCardData }) {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
                 </svg>
-                {post.view_count.toLocaleString()}
+                {post.views.toLocaleString()}
               </span>
               <span>{post.published_at ? formatRelativeDate(post.published_at) : ''}</span>
             </div>

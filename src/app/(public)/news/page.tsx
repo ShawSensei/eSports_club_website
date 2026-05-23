@@ -5,6 +5,7 @@ import { NewsCard, type NewsCardData } from '@/components/features/news/NewsCard
 import { NewsFilters } from '@/components/features/news/NewsFilters'
 import { Pagination } from '@/components/features/news/Pagination'
 import { SkeletonCard } from '@/components/ui/Skeleton'
+import { AnimatedGrid, AnimatedGridItem } from '@/components/ui/AnimatedGrid'
 
 export const metadata: Metadata = { title: 'News' }
 
@@ -40,13 +41,13 @@ export default async function NewsPage({ searchParams }: { searchParams: SearchP
 
   let dbQuery = supabase
     .from('news_posts')
-    .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, view_count, games(name, slug), profiles(display_name, avatar_url)', { count: 'exact' })
+    .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, views, games(name, slug), profiles(display_name, avatar_url)', { count: 'exact' })
     .eq('is_published', true)
     .order('is_pinned', { ascending: false })
     .order('published_at', { ascending: false })
     .range((page - 1) * PER_PAGE, page * PER_PAGE - 1)
 
-  if (category) dbQuery = dbQuery.eq('category', category)
+  if (category) dbQuery = dbQuery.eq('category', category as any)
   if (gameId) dbQuery = dbQuery.eq('game_id', gameId)
   if (query) dbQuery = dbQuery.ilike('title', `%${query}%`)
 
@@ -80,11 +81,13 @@ export default async function NewsPage({ searchParams }: { searchParams: SearchP
           <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Try adjusting your filters</p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <AnimatedGrid className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {posts.map(post => (
-            <NewsCard key={post.id} post={post} />
+            <AnimatedGridItem key={post.id}>
+              <NewsCard post={post} />
+            </AnimatedGridItem>
           ))}
-        </div>
+        </AnimatedGrid>
       )}
 
       {/* Pagination */}

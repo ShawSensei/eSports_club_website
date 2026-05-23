@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/Button'
 import { MarkdownEditor } from '@/components/features/news/MarkdownEditor'
-import { createPost, updatePost, uploadCover } from './actions'
+import { ImageUpload } from '@/components/admin/ImageUpload'
+import { createPost, updatePost } from './actions'
 
 interface Game { id: string; name: string }
 
@@ -26,29 +27,17 @@ interface PostFormProps {
 const CATEGORIES = ['news', 'announcement', 'patch', 'strategy', 'event'] as const
 
 export function PostForm({ games, post }: PostFormProps) {
-  const [coverUrl, setCoverUrl] = useState(post?.cover_url ?? '')
+  const [coverUrl, setCoverUrl] = useState<string | null>(post?.cover_url ?? null)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [uploading, setUploading] = useState(false)
-
-  async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    const fd = new FormData()
-    fd.append('cover', file)
-    const result = await uploadCover(fd)
-    setUploading(false)
-    if ('error' in result) { setError(result.error) } else { setCoverUrl(result.url) }
-  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     setSaved(false)
     const fd = new FormData(e.currentTarget)
-    fd.set('cover_url', coverUrl)
+    fd.set('cover_url', coverUrl ?? '')
     startTransition(async () => {
       const result = post
         ? await updatePost(post.id, fd)
@@ -98,17 +87,12 @@ export function PostForm({ games, post }: PostFormProps) {
 
         <div className="sm:col-span-2">
           <label className="mb-1.5 block text-sm font-medium text-[var(--text-secondary)]">Cover Image</label>
-          <div className="flex items-center gap-3">
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverUpload} className="text-sm text-[var(--text-muted)]" />
-            {uploading && <span className="text-xs text-[var(--text-muted)]">Uploading…</span>}
-          </div>
-          {coverUrl && (
-            <div className="mt-2 flex items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={coverUrl} alt="Cover preview" className="h-16 w-24 rounded object-cover" />
-              <button type="button" onClick={() => setCoverUrl('')} className="text-xs text-red-400 hover:text-red-300">Remove</button>
-            </div>
-          )}
+          <ImageUpload
+            value={coverUrl}
+            onChange={setCoverUrl}
+            folder="esports/news"
+            label="Cover image"
+          />
         </div>
       </div>
 

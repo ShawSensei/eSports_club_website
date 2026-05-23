@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface NavItem {
@@ -106,7 +107,6 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ role }: AdminSidebarProps) {
   const pathname = usePathname()
-
   const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || role === 'admin')
 
   return (
@@ -118,25 +118,38 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
       </div>
 
       <nav className="flex-1 overflow-y-auto p-2">
-        {visibleItems.map(item => {
+        {visibleItems.map((item, i) => {
           const isActive = item.href === '/admin'
             ? pathname === '/admin'
             : pathname.startsWith(item.href)
 
           return (
-            <Link
+            <motion.div
               key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                isActive
-                  ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
-                  : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
-              )}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
-              {item.icon}
-              {item.label}
-            </Link>
+              <Link
+                href={item.href}
+                className={cn(
+                  'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150',
+                  isActive
+                    ? 'text-[var(--accent-primary)]'
+                    : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebar-active"
+                    className="absolute inset-0 rounded-lg bg-[var(--accent-primary)]/10"
+                    transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+                  />
+                )}
+                <span className="relative">{item.icon}</span>
+                <span className="relative">{item.label}</span>
+              </Link>
+            </motion.div>
           )
         })}
       </nav>

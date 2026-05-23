@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
+import { ImageUpload } from '@/components/admin/ImageUpload'
 import { addGame, updateGame, toggleGameSupport } from './actions'
 
 interface Game {
@@ -11,6 +13,8 @@ interface Game {
   current_patch: string | null
   is_supported: boolean
   sort_order: number
+  logo_url?: string | null
+  cover_url?: string | null
 }
 
 interface GamesManagerProps {
@@ -22,14 +26,28 @@ export function GamesManager({ games }: GamesManagerProps) {
   const [editId, setEditId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [logoUrls, setLogoUrls] = useState<Record<string, string | null>>({})
+  const [coverUrls, setCoverUrls] = useState<Record<string, string | null>>({})
+  const [newLogoUrl, setNewLogoUrl] = useState<string | null>(null)
+  const [newCoverUrl, setNewCoverUrl] = useState<string | null>(null)
+
+  function getLogoUrl(game: Game): string | null {
+    return editId === game.id && game.id in logoUrls ? logoUrls[game.id] : (game.logo_url ?? null)
+  }
+
+  function getCoverUrl(game: Game): string | null {
+    return editId === game.id && game.id in coverUrls ? coverUrls[game.id] : (game.cover_url ?? null)
+  }
 
   function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     const fd = new FormData(e.currentTarget)
+    fd.set('logo_url', newLogoUrl ?? '')
+    fd.set('cover_url', newCoverUrl ?? '')
     startTransition(async () => {
       const result = await addGame(fd)
-      if ('error' in result) { setError(result.error) } else { setShowAdd(false) }
+      if ('error' in result) { setError(result.error) } else { setShowAdd(false); setNewLogoUrl(null); setNewCoverUrl(null) }
     })
   }
 
@@ -37,6 +55,8 @@ export function GamesManager({ games }: GamesManagerProps) {
     e.preventDefault()
     setError(null)
     const fd = new FormData(e.currentTarget)
+    if (id in logoUrls) fd.set('logo_url', logoUrls[id] ?? '')
+    if (id in coverUrls) fd.set('cover_url', coverUrls[id] ?? '')
     startTransition(async () => {
       const result = await updateGame(id, fd)
       if ('error' in result) { setError(result.error) } else { setEditId(null) }
@@ -57,18 +77,40 @@ export function GamesManager({ games }: GamesManagerProps) {
         {games.map(game => (
           <div key={game.id} className="py-3">
             {editId === game.id ? (
-              <form onSubmit={e => handleUpdate(game.id, e)} className="flex flex-wrap items-end gap-3">
-                <div>
-                  <label className="mb-1 block text-xs text-[var(--text-muted)]">Name</label>
-                  <input name="name" defaultValue={game.name} required className={inputClass} />
+              <form onSubmit={e => handleUpdate(game.id, e)} className="space-y-3">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-[var(--text-muted)]">Name</label>
+                    <input name="name" defaultValue={game.name} required className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-[var(--text-muted)]">Patch</label>
+                    <input name="current_patch" defaultValue={game.current_patch ?? ''} maxLength={32} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-[var(--text-muted)]">Order</label>
+                    <input name="sort_order" type="number" defaultValue={game.sort_order} className={`${inputClass} w-20`} />
+                  </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs text-[var(--text-muted)]">Patch</label>
-                  <input name="current_patch" defaultValue={game.current_patch ?? ''} maxLength={32} className={inputClass} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs text-[var(--text-muted)]">Order</label>
-                  <input name="sort_order" type="number" defaultValue={game.sort_order} className={`${inputClass} w-20`} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs text-[var(--text-muted)]">Logo Image</label>
+                    <ImageUpload
+                      value={getLogoUrl(game)}
+                      onChange={url => setLogoUrls(prev => ({ ...prev, [game.id]: url }))}
+                      folder="esports/games"
+                      label={`${game.name} logo`}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-[var(--text-muted)]">Cover / Banner Image</label>
+                    <ImageUpload
+                      value={getCoverUrl(game)}
+                      onChange={url => setCoverUrls(prev => ({ ...prev, [game.id]: url }))}
+                      folder="esports/games"
+                      label={`${game.name} cover`}
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button type="submit" size="sm" loading={isPending}>Save</Button>
@@ -77,6 +119,11 @@ export function GamesManager({ games }: GamesManagerProps) {
               </form>
             ) : (
               <div className="flex items-center gap-4">
+                {game.logo_url && (
+                  <div className="relative h-8 w-8 overflow-hidden rounded">
+                    <Image src={game.logo_url} alt={game.name} fill className="object-cover" />
+                  </div>
+                )}
                 <div className="flex-1">
                   <span className="font-medium text-[var(--text-primary)]">{game.name}</span>
                   {game.current_patch && (
@@ -128,9 +175,19 @@ export function GamesManager({ games }: GamesManagerProps) {
               <input name="sort_order" type="number" defaultValue={0} className={`${inputClass} w-20`} />
             </div>
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs text-[var(--text-muted)]">Logo Image</label>
+              <ImageUpload value={newLogoUrl} onChange={setNewLogoUrl} folder="esports/games" label="Game logo" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-[var(--text-muted)]">Cover / Banner Image</label>
+              <ImageUpload value={newCoverUrl} onChange={setNewCoverUrl} folder="esports/games" label="Game cover" />
+            </div>
+          </div>
           <div className="flex gap-2">
             <Button type="submit" size="sm" loading={isPending}>Add Game</Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowAdd(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => { setShowAdd(false); setNewLogoUrl(null); setNewCoverUrl(null) }}>Cancel</Button>
           </div>
         </form>
       ) : (

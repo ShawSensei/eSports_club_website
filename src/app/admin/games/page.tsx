@@ -11,6 +11,7 @@ type GameRow = {
   is_supported: boolean
   sort_order: number
   logo_url: string | null
+  cover_url: string | null
 }
 
 export default async function AdminGamesPage() {
@@ -22,7 +23,7 @@ export default async function AdminGamesPage() {
 
   const { data } = await supabase
     .from('games')
-    .select('id, name, slug, current_patch, is_supported, sort_order, logo_url')
+    .select('id, name, slug, current_patch, is_supported, sort_order, logo_url, cover_url')
     .order('sort_order')
 
   const games = (data ?? []) as GameRow[]

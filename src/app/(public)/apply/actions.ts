@@ -21,6 +21,11 @@ export async function submitApplication(formData: FormData): Promise<ApplyAction
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  if (user) {
+    log.warn('apply', 'logged-in user attempted to submit application', { userId: user.id })
+    return { error: 'You already have an account. Membership applications are for new members only.' }
+  }
+
   const parsed = applySchema.safeParse({
     full_name: formData.get('full_name'),
     email: formData.get('email'),
@@ -39,7 +44,7 @@ export async function submitApplication(formData: FormData): Promise<ApplyAction
   log.db('apply', 'insert membership_application', { email: parsed.data.email })
   const { error } = await (supabase as any)
     .from('membership_applications')
-    .insert({ ...parsed.data, user_id: user?.id ?? null })
+    .insert({ ...parsed.data, user_id: null })
 
   if (error) {
     log.error('apply', 'submitApplication db error', { code: error.code, message: error.message })

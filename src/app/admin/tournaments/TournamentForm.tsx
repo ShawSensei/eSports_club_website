@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { ImageUpload } from '@/components/admin/ImageUpload'
 import { createTournament, updateTournament } from './actions'
 
 interface Game { id: string; name: string }
@@ -18,6 +19,7 @@ interface TournamentData {
   stream_url: string | null
   start_date: string | null
   end_date: string | null
+  cover_url: string | null
 }
 
 interface TournamentFormProps {
@@ -28,6 +30,7 @@ interface TournamentFormProps {
 const FORMATS = ['single_elimination', 'double_elimination', 'round_robin', 'swiss'] as const
 
 export function TournamentForm({ games, tournament }: TournamentFormProps) {
+  const [coverUrl, setCoverUrl] = useState<string | null>(tournament?.cover_url ?? null)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -37,6 +40,7 @@ export function TournamentForm({ games, tournament }: TournamentFormProps) {
     setError(null)
     setSaved(false)
     const fd = new FormData(e.currentTarget)
+    fd.set('cover_url', coverUrl ?? '')
     startTransition(async () => {
       const result = tournament
         ? await updateTournament(tournament.id, fd)
@@ -110,6 +114,16 @@ export function TournamentForm({ games, tournament }: TournamentFormProps) {
           <label className="mb-1.5 block text-sm font-medium text-[var(--text-secondary)]">Rules URL</label>
           <input name="rules_url" type="url" defaultValue={tournament?.rules_url ?? ''} className={inputClass} placeholder="https://docs.google.com/..." />
         </div>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-[var(--text-secondary)]">Cover Image</label>
+        <ImageUpload
+          value={coverUrl}
+          onChange={setCoverUrl}
+          folder="esports/tournaments"
+          label="Tournament cover"
+        />
       </div>
 
       {error && <p className="text-sm text-red-400">{error}</p>}

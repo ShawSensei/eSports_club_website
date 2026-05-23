@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { TournamentStatusTabs } from '@/components/features/tournaments/TournamentStatusTabs'
 import { formatDate } from '@/lib/utils'
+import { AnimatedGrid, AnimatedGridItem } from '@/components/ui/AnimatedGrid'
 
 export const metadata: Metadata = { title: 'Tournaments' }
 
@@ -45,7 +46,7 @@ export default async function TournamentsPage({
     .order('start_date', { ascending: false })
 
   if (status !== 'all') {
-    query = query.eq('status', status)
+    query = query.eq('status', status as any)
   }
 
   const { data } = await query
@@ -73,9 +74,10 @@ export default async function TournamentsPage({
           <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Check back soon</p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <AnimatedGrid className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tournaments.map((t) => (
-            <Link key={t.id} href={`/tournaments/${t.id}`} className="group block">
+            <AnimatedGridItem key={t.id}>
+            <Link href={`/tournaments/${t.id}`} className="group block">
               <Card variant="hover" className="flex h-full flex-col overflow-hidden p-0">
                 {/* Cover */}
                 <div className="relative h-44 w-full overflow-hidden bg-[var(--bg-elevated)]">
@@ -128,8 +130,9 @@ export default async function TournamentsPage({
                 </div>
               </Card>
             </Link>
+            </AnimatedGridItem>
           ))}
-        </div>
+        </AnimatedGrid>
       )}
     </div>
   )

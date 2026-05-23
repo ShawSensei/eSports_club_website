@@ -1,16 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter, Orbitron } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
+import { CustomCursor } from '@/components/ui/CustomCursor'
+import { Preloader } from '@/components/ui/Preloader'
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'swap',
-})
-
-const orbitron = Orbitron({
-  subsets: ['latin'],
-  variable: '--font-orbitron',
   display: 'swap',
 })
 
@@ -25,8 +21,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${orbitron.variable}`}>
-      <body className="antialiased">{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body className="antialiased">
+        <Preloader />
+        <CustomCursor />
+        {children}
+      </body>
     </html>
   )
 }

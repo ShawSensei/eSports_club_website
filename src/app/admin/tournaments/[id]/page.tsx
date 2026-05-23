@@ -19,6 +19,7 @@ type TournamentRow = {
   stream_url: string | null
   start_date: string | null
   end_date: string | null
+  cover_url: string | null
   registration_open: boolean
 }
 

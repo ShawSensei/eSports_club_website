@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card } from '@/components/ui/Card'
 import { ApplyForm } from './ApplyForm'
@@ -10,12 +11,6 @@ export const metadata: Metadata = {
 
 type GameRow = { id: string; name: string }
 
-type ProfilePrefill = {
-  full_name: string
-  email: string
-  discord_tag: string
-}
-
 export default async function ApplyPage() {
   const supabase = createClient()
 
@@ -24,27 +19,42 @@ export default async function ApplyPage() {
     supabase.from('games').select('id, name').eq('is_supported', true).order('sort_order'),
   ])
 
-  let prefill: ProfilePrefill = { full_name: '', email: '', discord_tag: '' }
-
+  // Already have an account — no need to apply
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('display_name, discord_tag')
-      .eq('id', user.id)
-      .single<{ display_name: string | null; discord_tag: string | null }>()
-
-    prefill = {
-      full_name: profile?.display_name ?? '',
-      email: user.email ?? '',
-      discord_tag: profile?.discord_tag ?? '',
-    }
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-10 text-center">
+          <div className="mb-4 text-5xl">🎮</div>
+          <h1 className="mb-3 text-2xl font-bold text-[var(--text-primary)]">
+            You&apos;re already a member!
+          </h1>
+          <p className="mb-6 text-[var(--text-secondary)]">
+            You already have an account. Head to your profile to manage your settings,
+            or check out upcoming tournaments.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/profile"
+              className="rounded-lg bg-[var(--accent-primary)] px-6 py-2 font-semibold text-black transition hover:opacity-90"
+            >
+              Go to Profile
+            </Link>
+            <Link
+              href="/tournaments"
+              className="rounded-lg border border-[var(--border)] px-6 py-2 font-semibold text-[var(--text-primary)] transition hover:bg-[var(--bg-card-hover)]"
+            >
+              View Tournaments
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const gameList = (games ?? []) as GameRow[]
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
-      {/* Header */}
       <div className="mb-10">
         <h1 className="mb-3 text-4xl font-bold text-[var(--text-primary)]">
           Apply for Membership
@@ -55,7 +65,6 @@ export default async function ApplyPage() {
         </p>
       </div>
 
-      {/* What to expect */}
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         {[
           { icon: '📋', title: 'Apply', desc: 'Fill out the form below' },
@@ -74,7 +83,7 @@ export default async function ApplyPage() {
       </div>
 
       <Card>
-        <ApplyForm games={gameList} prefill={prefill} />
+        <ApplyForm games={gameList} prefill={{ full_name: '', email: '', discord_tag: '' }} />
       </Card>
     </div>
   )

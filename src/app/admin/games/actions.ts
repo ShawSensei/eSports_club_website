@@ -23,6 +23,8 @@ const gameSchema = z.object({
   slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
   current_patch: z.string().max(32).nullable(),
   sort_order: z.coerce.number().int().min(0),
+  logo_url: z.string().url().nullable(),
+  cover_url: z.string().url().nullable(),
 })
 
 export async function addGame(formData: FormData): Promise<ActionResult> {
@@ -33,6 +35,8 @@ export async function addGame(formData: FormData): Promise<ActionResult> {
     slug: formData.get('slug'),
     current_patch: formData.get('current_patch') || null,
     sort_order: formData.get('sort_order') || 0,
+    logo_url: (formData.get('logo_url') as string) || null,
+    cover_url: (formData.get('cover_url') as string) || null,
   })
   if (!parsed.success) {
     log.warn('games', 'addGame validation failed', parsed.error.errors)
@@ -42,7 +46,15 @@ export async function addGame(formData: FormData): Promise<ActionResult> {
   log.db('games', 'insert game', { name: parsed.data.name, slug: parsed.data.slug })
   const { data, error } = await (supabase as any)
     .from('games')
-    .insert({ ...parsed.data, is_supported: true })
+    .insert({
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      current_patch: parsed.data.current_patch,
+      sort_order: parsed.data.sort_order,
+      logo_url: parsed.data.logo_url,
+      cover_url: parsed.data.cover_url,
+      is_supported: true,
+    })
     .select('id')
     .single()
 
@@ -62,18 +74,28 @@ export async function addGame(formData: FormData): Promise<ActionResult> {
 export async function updateGame(id: string, formData: FormData): Promise<ActionResult> {
   const { supabase, user } = await requireAdmin()
 
+  const logoUrl = formData.get('logo_url') as string | null
+  const coverUrl = formData.get('cover_url') as string | null
+
+  log.db('games', 'updateGame', { id })
   const { error } = await (supabase as any)
     .from('games')
     .update({
       name: formData.get('name'),
       current_patch: (formData.get('current_patch') as string) || null,
       sort_order: Number(formData.get('sort_order')) || 0,
+      ...(logoUrl !== null && { logo_url: logoUrl || null }),
+      ...(coverUrl !== null && { cover_url: coverUrl || null }),
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) {
+    log.error('games', 'updateGame db error', { code: error.code, message: error.message })
+    return { error: error.message }
+  }
 
+  log.success('games', 'game updated', { id })
   await logAudit(user.id, 'game.update', 'game', id)
   revalidatePath('/admin/games')
   revalidatePath('/games')

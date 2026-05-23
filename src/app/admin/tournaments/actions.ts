@@ -29,6 +29,7 @@ const tournamentSchema = z.object({
   stream_url: z.string().url().nullable(),
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
+  cover_url: z.string().url().nullable(),
 })
 
 export async function createTournament(formData: FormData): Promise<ActionResult> {
@@ -45,6 +46,7 @@ export async function createTournament(formData: FormData): Promise<ActionResult
     stream_url: formData.get('stream_url') || null,
     start_date: formData.get('start_date') || null,
     end_date: formData.get('end_date') || null,
+    cover_url: (formData.get('cover_url') as string) || null,
   })
   if (!parsed.success) {
     log.warn('tournaments', 'createTournament validation failed', parsed.error.errors)
@@ -84,6 +86,7 @@ export async function updateTournament(id: string, formData: FormData): Promise<
     stream_url: formData.get('stream_url') || null,
     start_date: formData.get('start_date') || null,
     end_date: formData.get('end_date') || null,
+    cover_url: (formData.get('cover_url') as string) || null,
   })
   if (!parsed.success) return { error: parsed.error.errors[0].message }
 

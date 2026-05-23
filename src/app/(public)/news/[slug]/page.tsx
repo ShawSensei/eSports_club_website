@@ -42,7 +42,7 @@ type PostDetail = {
   cover_url: string | null
   category: string
   published_at: string | null
-  view_count: number
+  views: number
   game_id: string | null
   games: { id: string; name: string; slug: string } | null
   profiles: { display_name: string | null; avatar_url: string | null; username: string | null } | null
@@ -53,7 +53,7 @@ export default async function NewsPostPage({ params }: PageParams) {
 
   const { data } = await supabase
     .from('news_posts')
-    .select('id, title, slug, excerpt, body, cover_url, category, published_at, view_count, game_id, games(id, name, slug), profiles(display_name, avatar_url, username)')
+    .select('id, title, slug, excerpt, body, cover_url, category, published_at, views, game_id, games(id, name, slug), profiles(display_name, avatar_url, username)')
     .eq('slug', params.slug)
     .eq('is_published', true)
     .single()
@@ -67,7 +67,7 @@ export default async function NewsPostPage({ params }: PageParams) {
   // Related posts — same game or same category, excluding this post
   let relatedQuery = supabase
     .from('news_posts')
-    .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, view_count, games(name, slug), profiles(display_name, avatar_url)')
+    .select('id, title, slug, excerpt, cover_url, category, published_at, is_pinned, views, games(name, slug), profiles(display_name, avatar_url)')
     .eq('is_published', true)
     .neq('id', post.id)
     .limit(3)
@@ -75,7 +75,7 @@ export default async function NewsPostPage({ params }: PageParams) {
   if (post.game_id) {
     relatedQuery = relatedQuery.eq('game_id', post.game_id)
   } else {
-    relatedQuery = relatedQuery.eq('category', post.category)
+    relatedQuery = relatedQuery.eq('category', post.category as any)
   }
   relatedQuery = relatedQuery.order('published_at', { ascending: false })
 
@@ -136,7 +136,7 @@ export default async function NewsPostPage({ params }: PageParams) {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
                   </svg>
-                  {post.view_count.toLocaleString()} views
+                  {post.views.toLocaleString()} views
                 </span>
               </p>
             </div>

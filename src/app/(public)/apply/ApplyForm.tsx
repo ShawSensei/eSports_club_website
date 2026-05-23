@@ -144,7 +144,7 @@ export function ApplyForm({ games, prefill }: ApplyFormProps) {
         <label htmlFor="experience" className="mb-1.5 block text-sm font-medium text-[var(--text-secondary)]">
           Gaming Experience
         </label>
-        <p className="mb-2 text-xs text-[var(--text-muted)]">Share your competitive history, ranks, teams you've been on, etc.</p>
+        <p className="mb-2 text-xs text-[var(--text-muted)]">Share your competitive history, ranks, teams you&apos;ve been on, etc.</p>
         <textarea
           id="experience"
           name="experience"

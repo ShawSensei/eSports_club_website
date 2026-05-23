@@ -162,23 +162,3 @@ export async function deletePost(id: string): Promise<ActionResult> {
   return { success: true }
 }
 
-export async function uploadCover(formData: FormData): Promise<{ error: string } | { url: string }> {
-  const { supabase, user: _ } = await requireMod()
-
-  const file = formData.get('cover') as File | null
-  if (!file || file.size === 0) return { error: 'No file selected.' }
-  if (file.size > 5 * 1024 * 1024) return { error: 'File must be under 5MB.' }
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-    return { error: 'Only JPEG, PNG, and WebP images are allowed.' }
-  }
-
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `covers/${Date.now()}.${ext}`
-  const bytes = await file.arrayBuffer()
-
-  const { error } = await supabase.storage.from('covers').upload(path, bytes, { contentType: file.type, upsert: false })
-  if (error) return { error: error.message }
-
-  const { data: { publicUrl } } = supabase.storage.from('covers').getPublicUrl(path)
-  return { url: publicUrl }
-}
