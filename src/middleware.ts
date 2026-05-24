@@ -32,7 +32,9 @@ export async function middleware(request: NextRequest) {
   if (!user && (path.startsWith('/profile') || path.startsWith('/admin'))) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
-    loginUrl.searchParams.set('next', path)
+    // Don't leak admin path existence in the redirect param
+    const safeNext = path.startsWith('/admin') ? '/' : path
+    loginUrl.searchParams.set('next', safeNext)
     return NextResponse.redirect(loginUrl)
   }
 

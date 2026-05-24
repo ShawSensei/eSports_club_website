@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ['10.11.201.137'],
   images: {
     remotePatterns: [
       {
@@ -14,6 +13,11 @@ const nextConfig = {
       },
     ],
   },
+}
+
+// allowedDevOrigins is a development-only setting — never ship to production
+if (process.env.NODE_ENV === 'development') {
+  nextConfig.allowedDevOrigins = ['10.11.201.137']
 }
 
 export default nextConfig

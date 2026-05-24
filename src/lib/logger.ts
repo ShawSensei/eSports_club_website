@@ -13,6 +13,17 @@
 const isDev = process.env.NODE_ENV === 'development'
 const isServer = typeof window === 'undefined'
 
+// Strip PII fields from log data in production
+const PII_KEYS = new Set(['email', 'password', 'token', 'secret', 'key', 'authorization'])
+function sanitizeForLog(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null) return data
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    out[k] = PII_KEYS.has(k.toLowerCase()) ? '***' : v
+  }
+  return out
+}
+
 // ── ANSI helpers (server only) ────────────────────────────────────────────────
 const A = {
   reset:   '\x1b[0m',
@@ -88,13 +99,18 @@ const log = {
       if (data !== undefined) {
         if (data instanceof Error) {
           console.error(`${A.red}${A.dim}  →${A.reset}`, data.message)
+          // Stack traces only in dev — never expose in production logs
           if (isDev && data.stack) console.error(`${A.dim}${data.stack}${A.reset}`)
         } else {
-          console.error(`${A.red}${A.dim}  →${A.reset}`, data)
+          // In production strip anything that looks like PII
+          const safe = isDev ? data : sanitizeForLog(data)
+          console.error(`${A.red}${A.dim}  →${A.reset}`, safe)
         }
       }
     } else {
-      browserPrint('#ef4444', '✗', tag, msg, data)
+      // Browser errors never print raw data in production
+      if (isDev) browserPrint('#ef4444', '✗', tag, msg, data)
+      else browserPrint('#ef4444', '✗', tag, msg)
     }
   },
 }

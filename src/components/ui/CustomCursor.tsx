@@ -3,92 +3,80 @@
 import { useEffect, useRef } from 'react'
 
 export function CustomCursor() {
-  const dotRef  = useRef<HTMLDivElement>(null)
-  const ringRef = useRef<HTMLDivElement>(null)
+  const cursorRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const dot  = dotRef.current
-    const ring = ringRef.current
-    if (!dot || !ring) return
+    const el = cursorRef.current
+    if (!el) return
 
-    // Only activate on non-touch (pointer: fine) devices
-    const isTouch = window.matchMedia('(pointer: coarse)').matches
-    if (isTouch) return
+    // Touch / stylus devices — keep system cursor
+    if (window.matchMedia('(pointer: coarse)').matches) return
 
-    // Make cursor elements visible
-    dot.style.opacity  = '1'
-    ring.style.opacity = '1'
+    el.style.opacity = '1'
 
-    let ringX = 0, ringY = 0
-    let mouseX = 0, mouseY = 0
+    // ── Crosshair child elements ──
+    const dot    = el.querySelector<HTMLElement>('.xhair-dot')
+    const top    = el.querySelector<HTMLElement>('.xhair-top')
+    const bot    = el.querySelector<HTMLElement>('.xhair-bot')
+    const left   = el.querySelector<HTMLElement>('.xhair-left')
+    const right  = el.querySelector<HTMLElement>('.xhair-right')
+    const arms   = [top, bot, left, right].filter(Boolean) as HTMLElement[]
+
+    let curX = 0, curY = 0, mouseX = 0, mouseY = 0
     let rafId: number
 
-    const onMove = (e: MouseEvent) => {
-      mouseX = e.clientX
-      mouseY = e.clientY
-      dot.style.left = mouseX + 'px'
-      dot.style.top  = mouseY + 'px'
-    }
+    const onMove = (e: MouseEvent) => { mouseX = e.clientX; mouseY = e.clientY }
+    window.addEventListener('mousemove', onMove)
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
     const tick = () => {
-      ringX = lerp(ringX, mouseX, 0.1)
-      ringY = lerp(ringY, mouseY, 0.1)
-      ring.style.left = ringX + 'px'
-      ring.style.top  = ringY + 'px'
+      curX = lerp(curX, mouseX, 0.35)
+      curY = lerp(curY, mouseY, 0.35)
+      el.style.left = curX + 'px'
+      el.style.top  = curY + 'px'
       rafId = requestAnimationFrame(tick)
     }
     tick()
 
-    // Hover state helpers
-    const expand = () => {
-      ring.style.width  = '52px'
-      ring.style.height = '52px'
-      ring.style.borderColor = 'var(--accent-primary)'
-      ring.style.backgroundColor = 'rgba(0,212,255,0.06)'
-      dot.style.opacity = '0'
-    }
-    const collapse = () => {
-      ring.style.width  = '32px'
-      ring.style.height = '32px'
-      ring.style.borderColor = 'rgba(255,255,255,0.4)'
-      ring.style.backgroundColor = 'transparent'
-      dot.style.opacity = '1'
-    }
-    const textMode = () => {
-      ring.style.width  = '3px'
-      ring.style.height = '24px'
-      ring.style.borderRadius = '2px'
-      ring.style.borderColor  = 'var(--accent-primary)'
-    }
-    const textEnd = () => {
-      ring.style.width  = '32px'
-      ring.style.height = '32px'
-      ring.style.borderRadius = '50%'
-      ring.style.borderColor  = 'rgba(255,255,255,0.4)'
+    // ── State helpers ──
+    const setState = (gap: number, armLen: number, color: string, dotGlow: string) => {
+      if (top)   { top.style.bottom = gap + 'px'; top.style.height = armLen + 'px' }
+      if (bot)   { bot.style.top    = gap + 'px'; bot.style.height = armLen + 'px' }
+      if (left)  { left.style.right = gap + 'px'; left.style.width = armLen + 'px' }
+      if (right) { right.style.left = gap + 'px'; right.style.width = armLen + 'px' }
+      arms.forEach(a => a.style.background = color)
+      if (dot) { dot.style.background = color; dot.style.boxShadow = dotGlow }
     }
 
-    const attachTo = (el: Element) => {
-      if (el.matches('input, textarea, [contenteditable]')) {
-        el.addEventListener('mouseenter', textMode)
-        el.addEventListener('mouseleave', textEnd)
-      } else {
-        el.addEventListener('mouseenter', expand)
-        el.addEventListener('mouseleave', collapse)
-      }
+    const toDefault = () => setState(3, 7, 'rgba(255,255,255,0.9)', 'none')
+    const toHover   = () => setState(6, 5, 'var(--accent-primary)', '0 0 6px var(--accent-primary)')
+    const toText    = () => {
+      // Collapse into a thin I-beam style
+      if (top)   { top.style.bottom = '1px'; top.style.height = '10px' }
+      if (bot)   { bot.style.top    = '1px'; bot.style.height = '10px' }
+      if (left)  { left.style.right  = '999px'; left.style.width = '0px' }
+      if (right) { right.style.left  = '999px'; right.style.width = '0px' }
+      arms.forEach(a => a.style.background = 'var(--accent-primary)')
+      if (dot) { dot.style.background = 'var(--accent-primary)'; dot.style.boxShadow = '0 0 4px var(--accent-primary)' }
     }
 
-    const attachAll = () => {
-      document.querySelectorAll('a, button, [role="button"], label, input, textarea, [contenteditable]').forEach(attachTo)
-    }
-    attachAll()
+    toDefault()
 
-    // Re-attach when DOM changes (SPA navigation)
-    const observer = new MutationObserver(attachAll)
+    const attach = () => {
+      document.querySelectorAll('a, button, [role="button"], label').forEach(node => {
+        node.addEventListener('mouseenter', toHover)
+        node.addEventListener('mouseleave', toDefault)
+      })
+      document.querySelectorAll('input, textarea, [contenteditable]').forEach(node => {
+        node.addEventListener('mouseenter', toText)
+        node.addEventListener('mouseleave', toDefault)
+      })
+    }
+    attach()
+
+    const observer = new MutationObserver(attach)
     observer.observe(document.body, { childList: true, subtree: true })
-
-    window.addEventListener('mousemove', onMove)
 
     return () => {
       window.removeEventListener('mousemove', onMove)
@@ -97,48 +85,56 @@ export function CustomCursor() {
     }
   }, [])
 
+  // Shared arm transition
+  const armTransition = 'background 0.15s, width 0.18s cubic-bezier(0.22,1,0.36,1), height 0.18s cubic-bezier(0.22,1,0.36,1), top 0.18s cubic-bezier(0.22,1,0.36,1), bottom 0.18s cubic-bezier(0.22,1,0.36,1), left 0.18s cubic-bezier(0.22,1,0.36,1), right 0.18s cubic-bezier(0.22,1,0.36,1)'
+
+  // Arm base styles
+  const armBase: React.CSSProperties = {
+    position: 'absolute',
+    background: 'rgba(255,255,255,0.9)',
+    transition: armTransition,
+    borderRadius: 1,
+  }
+
   return (
-    <>
-      {/* Dot — snaps to cursor position instantly */}
+    <div
+      ref={cursorRef}
+      aria-hidden="true"
+      style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: 0, height: 0,
+        pointerEvents: 'none',
+        zIndex: 999999,
+        opacity: 0,
+        transform: 'translate(-50%, -50%) rotate(15deg)',
+        transition: 'opacity 0.2s',
+      }}
+    >
+      {/* Center dot */}
       <div
-        ref={dotRef}
-        aria-hidden="true"
+        className="xhair-dot"
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: 6,
-          height: 6,
-          background: '#fff',
+          position: 'absolute',
+          width: 2, height: 2,
           borderRadius: '50%',
-          pointerEvents: 'none',
-          zIndex: 999999,
-          transform: 'translate(-50%, -50%)',
-          mixBlendMode: 'difference',
-          opacity: 0,                         // shown by JS after mediaQuery check
-          transition: 'opacity 0.15s',
+          background: 'rgba(255,255,255,0.9)',
+          top: -1, left: -1,
+          transition: 'background 0.15s, box-shadow 0.15s',
         }}
       />
 
-      {/* Ring — lags behind cursor */}
-      <div
-        ref={ringRef}
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: 32,
-          height: 32,
-          border: '1px solid rgba(255,255,255,0.4)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          zIndex: 999998,
-          transform: 'translate(-50%, -50%)',
-          opacity: 0,                         // shown by JS after mediaQuery check
-          transition: 'width 0.25s, height 0.25s, border-color 0.25s, background-color 0.25s, border-radius 0.2s, opacity 0.15s',
-        }}
-      />
-    </>
+      {/* Top arm */}
+      <div className="xhair-top" style={{ ...armBase, width: 1.5, height: 7, left: -0.75, bottom: 3 }} />
+
+      {/* Bottom arm */}
+      <div className="xhair-bot" style={{ ...armBase, width: 1.5, height: 7, left: -0.75, top: 3 }} />
+
+      {/* Left arm */}
+      <div className="xhair-left" style={{ ...armBase, height: 1.5, width: 7, top: -0.75, right: 3 }} />
+
+      {/* Right arm */}
+      <div className="xhair-right" style={{ ...armBase, height: 1.5, width: 7, top: -0.75, left: 3 }} />
+    </div>
   )
 }
