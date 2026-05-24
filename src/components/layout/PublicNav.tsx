@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { cloneElement, isValidElement, useState, useTransition } from 'react'
+import { cn } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { logout } from '@/app/(auth)/actions'
 import type { User } from '@supabase/supabase-js'
@@ -82,6 +83,16 @@ export function PublicNav({ user, profile }: PublicNavProps) {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'moderator'
 
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
+  const rowLayoutClassName = expanded ? 'gap-3 px-[14px]' : 'justify-center px-0'
+  const renderNavIcon = (icon: React.ReactNode, active: boolean) => {
+    if (!isValidElement(icon)) return icon
+
+    return cloneElement(icon, {
+      fill: active ? 'var(--accent-primary)' : 'none',
+      stroke: active ? '#000' : 'currentColor',
+      strokeWidth: active ? 1.2 : icon.props.strokeWidth,
+    })
+  }
 
   return (
     <>
@@ -100,7 +111,7 @@ export function PublicNav({ user, profile }: PublicNavProps) {
         onMouseLeave={() => { setExpanded(false); setUserMenuOpen(false) }}
       >
         {/* Logo */}
-        <Link href="/" className="flex h-16 shrink-0 items-center gap-3 border-b px-[18px]" style={{ borderColor: 'var(--border)' }}>
+        <Link href="/" className={cn('flex h-16 shrink-0 items-center border-b', expanded ? 'gap-3 px-[18px]' : 'justify-center px-0')} style={{ borderColor: 'var(--border)' }}>
           {/* Logo icon */}
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-black"
@@ -114,7 +125,9 @@ export function PublicNav({ user, profile }: PublicNavProps) {
               fontFamily: 'var(--font-display)',
               color: 'var(--text-primary)',
               opacity: expanded ? 1 : 0,
-              transition: 'opacity 0.2s 0.05s',
+              maxWidth: expanded ? '140px' : '0px',
+              overflow: 'hidden',
+              transition: 'opacity 0.2s 0.05s, max-width 0.25s ease',
             }}
           >
             Esports Club
@@ -129,7 +142,7 @@ export function PublicNav({ user, profile }: PublicNavProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group relative flex items-center gap-3 rounded-lg px-[14px] py-2.5 text-xs font-semibold uppercase tracking-widest transition-colors duration-150"
+                className={cn('group relative flex items-center rounded-lg py-2.5 text-xs font-semibold uppercase tracking-widest transition-colors duration-150', rowLayoutClassName)}
                 style={{
                   color: active ? 'var(--accent-primary)' : 'rgba(255,255,255,0.35)',
                   background: active ? 'rgba(0,212,255,0.07)' : 'transparent',
@@ -139,10 +152,16 @@ export function PublicNav({ user, profile }: PublicNavProps) {
                 onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }}
                 onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } }}
               >
-                <span className="shrink-0">{item.icon}</span>
+                <span className="shrink-0" style={{ color: 'currentColor' }}>{renderNavIcon(item.icon, active)}</span>
                 <span
                   className="whitespace-nowrap"
-                  style={{ opacity: expanded ? 1 : 0, transition: 'opacity 0.2s 0.05s', letterSpacing: '0.1em' }}
+                  style={{
+                    opacity: expanded ? 1 : 0,
+                    maxWidth: expanded ? '140px' : '0px',
+                    overflow: 'hidden',
+                    transition: 'opacity 0.2s 0.05s, max-width 0.25s ease',
+                    letterSpacing: '0.1em',
+                  }}
                 >
                   {item.label}
                 </span>
@@ -173,7 +192,7 @@ export function PublicNav({ user, profile }: PublicNavProps) {
         <div className="shrink-0 border-t p-2" style={{ borderColor: 'var(--border)' }}>
           <Link
             href="/apply"
-            className="flex items-center gap-3 rounded-lg px-[14px] py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-150"
+            className={cn('flex items-center rounded-lg py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-150', rowLayoutClassName)}
             style={{
               fontFamily: 'var(--font-display)',
               background: 'rgba(0,212,255,0.1)',
@@ -187,7 +206,12 @@ export function PublicNav({ user, profile }: PublicNavProps) {
             </svg>
             <span
               className="whitespace-nowrap"
-              style={{ opacity: expanded ? 1 : 0, transition: 'opacity 0.2s 0.05s' }}
+              style={{
+                opacity: expanded ? 1 : 0,
+                maxWidth: expanded ? '140px' : '0px',
+                overflow: 'hidden',
+                transition: 'opacity 0.2s 0.05s, max-width 0.25s ease',
+              }}
             >
               Join Club
             </span>
@@ -199,13 +223,23 @@ export function PublicNav({ user, profile }: PublicNavProps) {
           {!user ? (
             <Link
               href="/login"
-              className="flex items-center gap-3 rounded-lg px-[14px] py-2.5 text-xs font-semibold uppercase tracking-widest"
+              className={cn('flex items-center rounded-lg py-2.5 text-xs font-semibold uppercase tracking-widest transition-colors', rowLayoutClassName)}
               style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-display)', letterSpacing: '0.1em' }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5 shrink-0">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              <span className="whitespace-nowrap" style={{ opacity: expanded ? 1 : 0, transition: 'opacity 0.2s 0.05s' }}>
+              <span className="shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-[18px] w-[18px] shrink-0">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+              </span>
+              <span
+                className="whitespace-nowrap"
+                style={{
+                  opacity: expanded ? 1 : 0,
+                  maxWidth: expanded ? '140px' : '0px',
+                  overflow: 'hidden',
+                  transition: 'opacity 0.2s 0.05s, max-width 0.25s ease',
+                }}
+              >
                 Sign In
               </span>
             </Link>
@@ -213,12 +247,18 @@ export function PublicNav({ user, profile }: PublicNavProps) {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(o => !o)}
-                className="flex w-full items-center gap-3 rounded-lg px-[14px] py-2 hover:bg-white/5 transition-colors"
+                className={cn('flex w-full items-center rounded-lg py-2.5 transition-colors hover:bg-white/5', rowLayoutClassName)}
               >
-                <Avatar src={profile?.avatar_url} name={displayName} size="xs" />
+                <Avatar src={profile?.avatar_url} name={displayName} size="sm" className="shrink-0" />
                 <span
                   className="whitespace-nowrap text-left text-xs font-medium"
-                  style={{ color: 'var(--text-secondary)', opacity: expanded ? 1 : 0, transition: 'opacity 0.2s 0.05s' }}
+                  style={{
+                    color: 'var(--text-secondary)',
+                    opacity: expanded ? 1 : 0,
+                    maxWidth: expanded ? '140px' : '0px',
+                    overflow: 'hidden',
+                    transition: 'opacity 0.2s 0.05s, max-width 0.25s ease',
+                  }}
                 >
                   {displayName}
                 </span>

@@ -36,8 +36,32 @@ export function NewsCard({ post }: { post: NewsCardData }) {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-transparent to-transparent" />
           {post.is_pinned && (
-            <div className="absolute left-3 top-3">
-              <Badge variant="announcement">Pinned</Badge>
+            <div
+              className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1"
+              style={{
+                background: 'rgba(192,251,80,0.15)',
+                border: '1px solid rgba(192,251,80,0.5)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <svg
+                width="9" height="9" viewBox="0 0 24 24"
+                fill="none" stroke="#c0fb50" strokeWidth="2.5"
+                strokeLinecap="round" strokeLinejoin="round"
+              >
+                <line x1="12" y1="17" x2="12" y2="22" />
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+              </svg>
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: '#c0fb50',
+              }}>
+                Pinned
+              </span>
             </div>
           )}
         </div>

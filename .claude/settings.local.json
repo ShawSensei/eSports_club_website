@@ -30,7 +30,8 @@
       "PowerShell(Invoke-WebRequest -Uri 'https://kprverse.com/_nuxt/entry.6ad9710f.css' -UseBasicParsing -TimeoutSec 30 | Select-Object -ExpandProperty Content)",
       "Bash(Get-ChildItem -Path \"D:\\\\Development\\\\AI Zone\\\\esports-club\" -Recurse -Depth 2)",
       "Bash(Select-Object FullName, PSIsContainer)",
-      "Bash(Format-Table -AutoSize)"
+      "Bash(Format-Table -AutoSize)",
+      "WebFetch(domain:www.facebook.com)"
     ]
   }
 }

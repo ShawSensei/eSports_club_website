@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { CustomCursor } from '@/components/ui/CustomCursor'
 import { Preloader } from '@/components/ui/Preloader'
+import { PageTransition } from '@/components/ui/PageTransition'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body className="antialiased">
         <Preloader />
+        <PageTransition />
         <CustomCursor />
         {children}
       </body>

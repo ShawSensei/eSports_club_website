@@ -67,8 +67,21 @@ function MatchCard({ match }: { match: Match }) {
       style={{ border: `1px solid ${isLive ? 'var(--accent-primary)' : 'var(--border)'}`, background: 'var(--bg-card)' }}
     >
       {isLive && (
-        <div className="px-3 py-1 text-center text-xs font-bold" style={{ background: 'var(--accent-primary)', color: '#000' }}>
-          🔴 LIVE
+        <div className="flex items-center justify-center gap-1.5 px-3 py-1.5"
+          style={{ background: 'rgba(255,72,32,0.15)', borderBottom: '1px solid rgba(255,72,32,0.3)' }}>
+          <span style={{
+            display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+            background: 'var(--accent-fire)',
+            boxShadow: '0 0 6px rgba(255,72,32,0.9)',
+            animation: 'live-dot 1.5s ease-in-out infinite',
+            flexShrink: 0,
+          }} />
+          <span style={{
+            fontFamily: 'var(--font-display)', fontSize: '0.6rem', fontWeight: 700,
+            letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--accent-fire)',
+          }}>
+            LIVE
+          </span>
         </div>
       )}
       <TeamRow

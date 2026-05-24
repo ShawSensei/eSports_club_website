@@ -36,8 +36,8 @@ interface HomeClientProps {
   stats: { label: string; value: number }[]
 }
 
-const WORDS_1 = ['Frag Out', 'Clutch', 'Ranked', 'Esports', 'Season 2025', 'Compete', 'Dominate', 'Squad Up']
-const WORDS_2 = ['Season 2025', 'Register Now', 'Competition', 'Esports Club', 'Pro Players', 'Champions', 'Training', 'Ranked Play']
+const WORDS_1 = ['Frag Out', 'Clutch', 'Ranked', 'Esports', 'Season 2026', 'Compete', 'Dominate', 'Squad Up']
+const WORDS_2 = ['Season 2026', 'Register Now', 'Competition', 'Esports Club', 'Pro Players', 'Champions', 'Training', 'Ranked Play']
 
 // Scramble a number element when it enters view
 function attachScramble(el: HTMLElement) {
@@ -72,6 +72,7 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
   // Section refs
   const newsRef  = useRef<HTMLElement>(null)
   const tournRef = useRef<HTMLElement>(null)
+  const aboutRef = useRef<HTMLElement>(null)
   const ctaRef   = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -212,6 +213,20 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
         })
       }
 
+      // ── About: left fly-in + right cards stagger ──
+      if (aboutRef.current) {
+        gsap.from(aboutRef.current.querySelectorAll('.about-el'), {
+          opacity: 0, y: 50, duration: 0.8, ease: 'power3.out',
+          stagger: { each: 0.12 },
+          scrollTrigger: { trigger: aboutRef.current, start: 'top 82%', toggleActions: 'play none none reverse' },
+        })
+        gsap.from(aboutRef.current.querySelectorAll('.about-card'), {
+          opacity: 0, x: 44, duration: 0.65, ease: 'power3.out',
+          stagger: { each: 0.1 },
+          scrollTrigger: { trigger: aboutRef.current, start: 'top 78%', toggleActions: 'play none none reverse' },
+        })
+      }
+
       // ── CTA section: scale up from small ──
       if (ctaRef.current) {
         gsap.from(ctaRef.current.querySelectorAll('.cta-el'), {
@@ -263,10 +278,10 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--bg))' }} />
 
-        <div className="relative mx-auto w-full max-w-6xl px-8 py-32 sm:px-12 lg:px-16">
+        <div className="relative mx-auto w-full max-w-6xl px-8 pt-16 pb-8 sm:px-12 lg:px-16">
 
           {/* Badge */}
-          <div ref={badgeRef} className="mb-10">
+          <div ref={badgeRef} className="mb-5">
             <span className="inline-flex items-center gap-2.5 rounded-full px-4 py-1.5"
               style={{
                 border: '1px solid rgba(192,251,80,0.32)',
@@ -282,46 +297,53 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
                 boxShadow: '0 0 8px rgba(192,251,80,0.8)',
                 animation: 'live-dot 1.5s ease-in-out infinite',
               }} />
-              Now Recruiting · Season 2025
+              Now Recruiting · Season 2026
             </span>
           </div>
 
           {/* Headline — overflow:hidden wrapper per line = clip-mask reveal */}
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 0.9, marginBottom: '2.5rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 0.9, marginBottom: '1.25rem' }}>
             <div style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
               <span ref={line1Ref} className="text-grad-cyan" style={{
                 display: 'block',
-                fontSize: 'clamp(3.8rem, 10.5vw, 9.5rem)',
+                fontSize: 'clamp(3rem, 8.5vw, 7.5rem)',
                 letterSpacing: '-0.035em', textTransform: 'uppercase',
               }}>Compete.</span>
             </div>
             <div style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
               <span ref={line2Ref} className="text-grad-purple" style={{
                 display: 'block',
-                fontSize: 'clamp(3.8rem, 10.5vw, 9.5rem)',
+                fontSize: 'clamp(3rem, 8.5vw, 7.5rem)',
                 letterSpacing: '-0.035em', textTransform: 'uppercase',
               }}>Dominate.</span>
             </div>
             <div style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
               <span ref={line3Ref} style={{
                 display: 'block',
-                fontSize: 'clamp(3.8rem, 10.5vw, 9.5rem)',
+                fontSize: 'clamp(3rem, 8.5vw, 7.5rem)',
                 letterSpacing: '-0.035em', textTransform: 'uppercase',
                 color: 'rgba(240,240,255,0.90)',
               }}>Win.</span>
             </div>
           </h1>
 
-          <div style={{ position: 'relative', maxWidth: 460, marginBottom: '2.5rem', overflow: 'hidden' }}>
+          <div style={{ position: 'relative', marginBottom: '1.25rem', maxWidth: 500, overflow: 'hidden', padding: '0.75rem 1.25rem' }}>
+            {/* Scan sweep */}
+            <div className="subtitle-scan" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(90deg, transparent 0%, rgba(192,251,80,0.18) 50%, transparent 100%)' }} />
+            {/* Corner brackets */}
+            <div style={{ position: 'absolute', top: 0, left: 0, width: 10, height: 10, borderTop: '1px solid rgba(192,251,80,0.5)', borderLeft: '1px solid rgba(192,251,80,0.5)' }} />
+            <div style={{ position: 'absolute', top: 0, right: 0, width: 10, height: 10, borderTop: '1px solid rgba(192,251,80,0.5)', borderRight: '1px solid rgba(192,251,80,0.5)' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: 10, height: 10, borderBottom: '1px solid rgba(192,251,80,0.5)', borderLeft: '1px solid rgba(192,251,80,0.5)' }} />
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderBottom: '1px solid rgba(192,251,80,0.5)', borderRight: '1px solid rgba(192,251,80,0.5)' }} />
             <p ref={subtitleRef} style={{
               color: 'var(--text-sub)',
               fontSize: 'clamp(0.88rem, 1.5vw, 1rem)',
               lineHeight: 1.82,
+              position: 'relative',
             }}>
               Join an elite esports organisation competing across multiple titles.
               Train with the best, represent the club, and rise through the ranks.
             </p>
-            <div className="subtitle-scan" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
           </div>
 
           {/* CTAs with magnetic effect */}
@@ -360,23 +382,29 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
           </div>
 
           {/* Stats */}
-          <div ref={statsRef} className="mt-20 flex flex-wrap items-start gap-10"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem' }}>
-            {stats.map(({ label, value }) => (
-              <div key={label} className="stat-item">
-                <div className="tabular-nums font-black" style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(2rem, 4vw, 2.8rem)',
-                  color: 'var(--accent)', letterSpacing: '-0.02em', lineHeight: 1,
-                }}>
-                  <AnimatedCounter value={value} />
-                </div>
-                <div style={{
-                  marginTop: '0.3rem', fontFamily: 'var(--font-display)',
-                  fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.18em',
-                  textTransform: 'uppercase', color: 'var(--text-muted)',
-                }}>
-                  {label}
+          <div ref={statsRef} className="mt-10 flex flex-wrap items-start gap-x-12 gap-y-6"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.25rem' }}>
+            {stats.map(({ label, value }, i) => (
+              <div key={label} className="stat-item flex items-center gap-4">
+                {i > 0 && (
+                  <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+                )}
+                <div>
+                  <div className="tabular-nums font-black" style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(2.2rem, 4.5vw, 3rem)',
+                    color: 'var(--accent)', letterSpacing: '-0.03em', lineHeight: 1,
+                  }}>
+                    <AnimatedCounter value={value} />
+                    <span style={{ fontSize: '0.45em', opacity: 0.6 }}>+</span>
+                  </div>
+                  <div style={{
+                    marginTop: '0.4rem', fontFamily: 'var(--font-display)',
+                    fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.16em',
+                    textTransform: 'uppercase', color: 'var(--text-sub)',
+                  }}>
+                    {label}
+                  </div>
                 </div>
               </div>
             ))}
@@ -387,7 +415,7 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
         <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex"
           style={{ color: 'rgba(240,240,255,0.07)' }}>
           <div style={{ writingMode: 'vertical-rl', fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.35em', fontWeight: 700 }}>
-            ESPORTS CLUB · 2025
+            ESPORTS CLUB · 2026
           </div>
           <div style={{ width: 1, height: 56, background: 'rgba(255,255,255,0.05)' }} />
           <div style={{ color: 'rgba(192,251,80,0.35)', fontSize: '0.45rem' }}>●</div>
@@ -676,7 +704,19 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
                         <div className="mb-0.5 flex items-center gap-2">
                           <Badge variant={t.status as any}>{t.status}</Badge>
                           {t.registration_open && (
-                            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--accent-green)' }}>
+                            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5" style={{
+                              background: 'rgba(0,232,122,0.1)',
+                              border: '1px solid rgba(0,232,122,0.35)',
+                              fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 700,
+                              letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--accent-green)',
+                            }}>
+                              <span style={{
+                                display: 'inline-block', width: 4, height: 4, borderRadius: '50%',
+                                background: 'var(--accent-green)',
+                                boxShadow: '0 0 4px rgba(0,232,122,0.75)',
+                                animation: 'live-dot 1.5s ease-in-out infinite',
+                                flexShrink: 0,
+                              }} />
                               REG OPEN
                             </span>
                           )}
@@ -708,6 +748,155 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
       </section>
 
       {/* ══════════════════════════════════════════════
+          ABOUT US
+      ══════════════════════════════════════════════ */}
+      <section ref={aboutRef} className="relative overflow-hidden py-24"
+        style={{ background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+        <div className="bg-dot-grid pointer-events-none absolute inset-0" style={{ opacity: 0.2 }} />
+        {/* Cyan glow right */}
+        <div className="pointer-events-none absolute inset-0" style={{
+          background: `
+            radial-gradient(ellipse 55% 60% at 100% 40%, rgba(34,211,238,0.06) 0%, transparent 55%),
+            radial-gradient(ellipse 40% 50% at 0% 70%, rgba(192,251,80,0.04) 0%, transparent 55%)
+          `,
+        }} />
+
+        <div className="relative mx-auto max-w-6xl px-8 sm:px-12 lg:px-16">
+
+          {/* Section header */}
+          <div className="mb-16 flex items-start gap-5">
+            <span className="sec-num hidden pt-1 text-5xl font-black sm:block"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--accent-cyan)', opacity: 0.1, lineHeight: 1, letterSpacing: '-0.04em' }}>
+              03
+            </span>
+            <div>
+              <p style={{ marginBottom: '0.3rem', fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'var(--accent-cyan)' }}>
+                Our Story
+              </p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900, letterSpacing: '-0.025em', lineHeight: 1, color: 'var(--text)', textTransform: 'uppercase' }}>
+                About Us
+              </h2>
+            </div>
+          </div>
+
+          {/* Two-column layout */}
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
+
+            {/* Left: text block */}
+            <div className="about-el flex flex-col justify-center">
+              {/* Mission statement */}
+              <div className="relative mb-8 pl-5"
+                style={{ borderLeft: '2px solid rgba(34,211,238,0.45)' }}>
+                <p style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  lineHeight: 1.15,
+                  color: 'var(--text)',
+                }}>
+                  BRAC University&apos;s<br />
+                  <span className="text-grad-cyan">Premier Esports</span><br />
+                  Organisation.
+                </p>
+              </div>
+
+              <p className="mb-5 text-sm leading-relaxed" style={{ color: 'var(--text-sub)' }}>
+                BRACU Esports Club is BRAC University&apos;s official competitive gaming organisation — a home for students who want to play at the highest level. From casual newcomers to aspiring pros, we welcome everyone with the drive to compete, improve, and represent their university on the national stage.
+              </p>
+              <p className="mb-8 text-sm leading-relaxed" style={{ color: 'var(--text-sub)' }}>
+                We field squads across multiple titles, host inter-university tournaments, and provide a structured environment where talent is developed and rivalries are forged. If you are grinding ranked or chasing glory on the main stage — this is where you belong.
+              </p>
+
+              {/* Identity tags */}
+              <div className="about-el flex flex-wrap gap-2">
+                {['BRAC University', 'Dhaka, BD', 'Multi-Title', 'Season 2026'].map(tag => (
+                  <span key={tag} style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.6rem', fontWeight: 700,
+                    letterSpacing: '0.18em', textTransform: 'uppercase',
+                    padding: '0.35rem 0.8rem',
+                    border: '1px solid rgba(34,211,238,0.22)',
+                    color: 'rgba(34,211,238,0.65)',
+                    borderRadius: 4,
+                    background: 'rgba(34,211,238,0.05)',
+                  }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: pillar cards */}
+            <div className="flex flex-col gap-4">
+              {[
+                {
+                  accent: 'var(--accent)',
+                  accentRaw: '192,251,80',
+                  label: 'Compete',
+                  desc: 'Train hard. Play harder. We field teams across FPS, MOBA, battle royale, and sports titles — representing BRACU in every arena.',
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  ),
+                },
+                {
+                  accent: 'var(--accent-purple)',
+                  accentRaw: '150,138,223',
+                  label: 'Community',
+                  desc: 'Weekly scrims, watch parties, bootcamps. We grow together, fail together, and win together. The squad extends beyond the server.',
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  ),
+                },
+                {
+                  accent: 'var(--accent-cyan)',
+                  accentRaw: '34,211,238',
+                  label: 'Represent',
+                  desc: 'Carry the BRACU banner. We are the face of BRAC University on every esports stage — locally, regionally, and beyond.',
+                  icon: (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                      <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    </svg>
+                  ),
+                },
+              ].map(({ accent, accentRaw, label, desc, icon }) => (
+                <div key={label} className="about-card group relative overflow-hidden rounded-xl px-6 py-5 transition-all duration-300"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{ background: `radial-gradient(ellipse at left, rgba(${accentRaw},0.07), transparent 70%)`, boxShadow: `inset 0 0 0 1px rgba(${accentRaw},0.28)` }} />
+                  {/* Left accent bar */}
+                  <div className="absolute inset-y-0 left-0 w-0.5 origin-bottom scale-y-0 transition-transform duration-300 group-hover:scale-y-100"
+                    style={{ background: accent }} />
+                  <div className="relative flex items-start gap-4">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                      style={{ background: `rgba(${accentRaw},0.1)`, border: `1px solid rgba(${accentRaw},0.22)`, color: accent }}>
+                      {icon}
+                    </div>
+                    <div>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text)', marginBottom: '0.3rem' }}>
+                        {label}
+                      </p>
+                      <p className="text-xs leading-relaxed" style={{ color: 'var(--text-sub)' }}>{desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
           CTA
       ══════════════════════════════════════════════ */}
       <section ref={ctaRef} className="relative overflow-hidden px-8 py-32 sm:px-12 lg:px-16"
@@ -725,7 +914,7 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
           <div className="cta-el mb-3 flex items-center justify-center gap-3">
             <span className="sec-num text-5xl font-black"
               style={{ fontFamily: 'var(--font-display)', color: 'var(--accent-fire)', opacity: 0.12, lineHeight: 1, letterSpacing: '-0.04em' }}>
-              03
+              04
             </span>
           </div>
 
@@ -749,7 +938,7 @@ export function HomeClient({ news, tournaments, games, stats }: HomeClientProps)
           </div>
 
           <p className="cta-el mx-auto mb-10 max-w-md text-sm leading-relaxed" style={{ color: 'var(--text-sub)' }}>
-            Apply for membership and join a community of dedicated players pushing each other to the next level. Season 2025 is open.
+            Apply for membership and join a community of dedicated players pushing each other to the next level. Season 2026 is open.
           </p>
 
           <div className="cta-el">

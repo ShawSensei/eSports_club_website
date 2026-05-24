@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
 
 type BadgeVariant =
@@ -6,21 +7,25 @@ type BadgeVariant =
   | 'admin' | 'moderator' | 'member'
   | 'default'
 
-const variantStyles: Record<BadgeVariant, string> = {
-  news:         'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  patch:        'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  strategy:     'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  event:        'bg-pink-500/20 text-pink-400 border-pink-500/30',
-  announcement: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-  upcoming:     'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  registration: 'bg-green-500/20 text-green-400 border-green-500/30',
-  ongoing:      'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  completed:    'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  cancelled:    'bg-red-500/20 text-red-400 border-red-500/30',
-  admin:        'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  moderator:    'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  member:       'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  default:      'bg-white/10 text-white/70 border-white/20',
+const variantStyle: Record<BadgeVariant, CSSProperties> = {
+  // ── News categories ────────────────────────────────────────────────────
+  news:         { background: 'rgba(34,211,238,0.12)',   color: 'var(--accent-cyan)',    border: '1px solid rgba(34,211,238,0.38)'    },
+  patch:        { background: 'rgba(255,214,10,0.12)',   color: 'var(--accent-yellow)',  border: '1px solid rgba(255,214,10,0.38)'    },
+  strategy:     { background: 'rgba(150,138,223,0.12)',  color: 'var(--accent-purple)',  border: '1px solid rgba(150,138,223,0.38)'   },
+  event:        { background: 'rgba(255,72,32,0.12)',    color: 'var(--accent-fire)',    border: '1px solid rgba(255,72,32,0.38)'     },
+  announcement: { background: 'rgba(192,251,80,0.12)',   color: 'var(--accent)',         border: '1px solid rgba(192,251,80,0.42)'    },
+  // ── Tournament statuses ────────────────────────────────────────────────
+  upcoming:     { background: 'rgba(150,138,223,0.12)',  color: 'var(--accent-purple)',  border: '1px solid rgba(150,138,223,0.38)'   },
+  registration: { background: 'rgba(0,232,122,0.12)',    color: 'var(--accent-green)',   border: '1px solid rgba(0,232,122,0.38)'     },
+  ongoing:      { background: 'rgba(255,72,32,0.12)',    color: 'var(--accent-fire)',    border: '1px solid rgba(255,72,32,0.42)'     },
+  completed:    { background: 'rgba(240,240,255,0.06)',  color: 'rgba(240,240,255,0.42)', border: '1px solid rgba(240,240,255,0.14)' },
+  cancelled:    { background: 'rgba(255,45,85,0.12)',    color: 'var(--accent-red)',     border: '1px solid rgba(255,45,85,0.38)'     },
+  // ── User roles ─────────────────────────────────────────────────────────
+  admin:        { background: 'rgba(192,251,80,0.12)',   color: 'var(--accent)',         border: '1px solid rgba(192,251,80,0.42)'    },
+  moderator:    { background: 'rgba(150,138,223,0.12)',  color: 'var(--accent-purple)',  border: '1px solid rgba(150,138,223,0.38)'   },
+  member:       { background: 'rgba(240,240,255,0.06)',  color: 'rgba(240,240,255,0.42)', border: '1px solid rgba(240,240,255,0.14)' },
+  // ── Fallback ───────────────────────────────────────────────────────────
+  default:      { background: 'rgba(255,255,255,0.07)',  color: 'rgba(240,240,255,0.55)', border: '1px solid rgba(255,255,255,0.16)' },
 }
 
 interface BadgeProps {
@@ -33,10 +38,10 @@ export function Badge({ variant = 'default', children, className }: BadgeProps) 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide',
-        variantStyles[variant],
+        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase tracking-wide',
         className
       )}
+      style={variantStyle[variant]}
     >
       {children}
     </span>

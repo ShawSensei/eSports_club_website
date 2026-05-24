@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useMotionValue, animate } from 'framer-motion'
-import type { PanInfo } from 'framer-motion'
 
 type HomeGame = {
   id: string
@@ -21,11 +20,15 @@ interface GamesCarouselProps {
 const ACCENT = '#c0fb50'
 const GAP = 20
 
+const AUTOPLAY_DELAY = 3400
+
 export function GamesCarousel({ games }: GamesCarouselProps) {
   const [active, setActive] = useState(0)
   const [cardW, setCardW] = useState(440)
+  const [isPaused, setIsPaused] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const dragX = useMotionValue(0)
+  const dirRef = useRef<1 | -1>(1)
 
   const unit = cardW + GAP
 
@@ -61,12 +64,17 @@ export function GamesCarousel({ games }: GamesCarouselProps) {
     animate(dragX, -(active * unit), { duration: 0 })
   }, [unit]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onDragEnd = (_: PointerEvent, info: PanInfo) => {
-    const threshold = cardW * 0.28
-    if (info.velocity.x < -400 || info.offset.x < -threshold) goTo(active + 1)
-    else if (info.velocity.x > 400 || info.offset.x > threshold) goTo(active - 1)
-    else goTo(active)
-  }
+  // Ping-pong autoplay
+  useEffect(() => {
+    if (isPaused || games.length <= 1) return
+    const timer = setTimeout(() => {
+      const next = active + dirRef.current
+      if (next >= games.length - 1) dirRef.current = -1
+      else if (next <= 0) dirRef.current = 1
+      goTo(Math.max(0, Math.min(games.length - 1, next)))
+    }, AUTOPLAY_DELAY)
+    return () => clearTimeout(timer)
+  }, [active, isPaused, games.length, goTo])
 
   // Keyboard navigation
   useEffect(() => {
@@ -81,7 +89,11 @@ export function GamesCarousel({ games }: GamesCarouselProps) {
   if (games.length === 0) return null
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div
+      style={{ position: 'relative' }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Overflow hidden clip */}
       <div ref={containerRef} style={{ overflow: 'hidden' }}>
         <motion.div
@@ -99,7 +111,12 @@ export function GamesCarousel({ games }: GamesCarouselProps) {
           drag="x"
           dragConstraints={{ left: -(games.length - 1) * unit, right: 0 }}
           dragElastic={0.08}
-          onDragEnd={onDragEnd}
+          onDragEnd={(_, info) => {
+            const threshold = cardW * 0.28
+            if (info.velocity.x < -400 || info.offset.x < -threshold) goTo(active + 1)
+            else if (info.velocity.x > 400 || info.offset.x > threshold) goTo(active - 1)
+            else goTo(active)
+          }}
           whileDrag={{ cursor: 'grabbing' }}
         >
           {games.map((game, i) => {
@@ -297,25 +314,43 @@ export function GamesCarousel({ games }: GamesCarouselProps) {
           })}
         </div>
 
-        {/* Dot indicators — wired to active state */}
+        {/* Dot indicators with progress fill */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           {games.map((_, i) => (
             <button
               key={i}
-              onClick={() => goTo(i)}
+              onClick={() => { dirRef.current = i > active ? 1 : -1; goTo(i) }}
               aria-label={`Go to game ${i + 1}`}
               style={{
-                width: i === active ? 26 : 6,
+                position: 'relative',
+                width: i === active ? 40 : 6,
                 height: 6,
                 borderRadius: 3,
-                background: i === active ? ACCENT : 'rgba(255,255,255,0.18)',
+                background: i === active ? 'rgba(192,251,80,0.2)' : 'rgba(255,255,255,0.18)',
                 border: 'none',
                 cursor: 'pointer',
                 padding: 0,
+                overflow: 'hidden',
                 transition: 'all 0.35s cubic-bezier(0.34,1.56,0.64,1)',
-                boxShadow: i === active ? `0 0 10px rgba(192,251,80,0.5)` : 'none',
+                boxShadow: i === active ? `0 0 10px rgba(192,251,80,0.35)` : 'none',
+                flexShrink: 0,
               }}
-            />
+            >
+              {i === active && !isPaused && (
+                <motion.div
+                  key={active}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: AUTOPLAY_DELAY / 1000, ease: 'linear' }}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    background: ACCENT,
+                    borderRadius: 3,
+                    transformOrigin: 'left center',
+                  }}
+                />
+              )}
+            </button>
           ))}
         </div>
 

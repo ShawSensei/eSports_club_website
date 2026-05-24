@@ -1,56 +1,42 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 
 export function Preloader() {
   const overlayRef  = useRef<HTMLDivElement>(null)
   const counterRef  = useRef<HTMLSpanElement>(null)
   const lineRef     = useRef<HTMLDivElement>(null)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Show only once per browser session
-    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('preloader_done')) return
-    setMounted(true)
-  }, [])
+    const overlay = overlayRef.current
+    const counter = counterRef.current
+    const line    = lineRef.current
+    if (!overlay) return
 
-  useEffect(() => {
-    if (!mounted) return
-
-    const overlay  = overlayRef.current
-    const counter  = counterRef.current
-    const line     = lineRef.current
-    if (!overlay || !counter || !line) return
+    if (!counter || !line) return
 
     const tl = gsap.timeline({
       onComplete: () => {
-        if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('preloader_done', '1')
         overlay.style.display = 'none'
       },
     })
 
     tl
-      // Count 0 → 100
       .to(counter, {
         innerHTML: 100,
-        duration: 1.6,
-        ease: 'power2.inOut',
+        duration: 2.4,
+        ease: 'power1.inOut',
         snap: { innerHTML: 1 },
       })
-      // Grow progress line to full
-      .from(line, { scaleX: 0, duration: 1.6, ease: 'power2.inOut' }, 0)
-      // Brief pause at 100
-      .to({}, { duration: 0.15 })
-      // Curtain slides up
+      .from(line, { scaleX: 0, duration: 2.4, ease: 'power1.inOut' }, 0)
+      .to({}, { duration: 0.3 })
       .to(overlay, {
         yPercent: -100,
         duration: 0.85,
         ease: 'power4.inOut',
       })
-  }, [mounted])
-
-  if (!mounted) return null
+  }, [])
 
   return (
     <div
@@ -88,7 +74,12 @@ export function Preloader() {
           fontWeight: 900,
           lineHeight: 1,
           letterSpacing: '-0.04em',
-          color: '#fff',
+          background: 'linear-gradient(105deg, #c0fb50 18%, #efffbe 50%, #c0fb50 82%)',
+          backgroundSize: '200% 100%',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          filter: 'drop-shadow(0 0 14px rgba(192,251,80,0.38))',
         }}
       >
         0
