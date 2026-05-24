@@ -1,42 +1,59 @@
-# Nexus — Esports Club Platform
+<div align="center">
 
-A full-stack esports club website built with Next.js 14, Supabase, and Tailwind CSS. Designed for competitive gaming communities that need a professional home: news, rosters, tournament management, real-time brackets, and a full admin panel — all without touching code after deploy.
+# Esports Club
+
+**A full-stack platform for competitive gaming communities.**  
+News · Rosters · Tournaments · Real-time Brackets · Admin Panel
+
+![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=flat&logo=nextdotjs&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)
+
+</div>
 
 ---
 
-## Stack
+## Overview
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Database / Auth / Storage | Supabase |
-| Styling | Tailwind CSS + CSS custom properties |
-| Animation | GSAP, Framer Motion, Lenis |
-| Forms | React Hook Form + Zod |
-| Deployment | Vercel |
+A production-ready esports club website where all content — news, rosters, tournaments, site copy — is managed through an admin panel with no redeployment required. Built on Next.js 14 App Router with Supabase for database, auth, storage, and real-time updates.
 
 ---
 
 ## Features
 
-**Public**
+**Public-facing**
 - News feed with categories, game filters, Markdown rendering, and view counts
 - Games hub with per-game patch notes, strategies, rosters, and leaderboards
-- Tournament listings with status filters and registration flow
-- Real-time bracket viewer — updates live as scores are entered, no refresh needed
-- User profiles with linked games, rank stats, and tournament history
+- Tournament listings with status filters and team registration
+- Real-time bracket viewer — scores update live without a page refresh
+- Public user profiles with linked games, rank stats, and tournament history
 
-**Auth**
+**Authentication**
 - Email/password and Discord OAuth via Supabase Auth
-- Profile auto-created on first sign-in via DB trigger
-- Three roles: `member`, `moderator`, `admin` — enforced at RLS, middleware, and layout levels
+- Profile auto-created on first sign-in via database trigger
+- Role system: `member` · `moderator` · `admin` — enforced at RLS, middleware, and layout levels
 
-**Admin Panel** (`/admin`)
-- Full CRUD for news posts, games, tournaments, and team applications
-- Bracket generation from approved teams — single-elimination, seeded automatically
-- Match score entry with VOD link support
-- User role management and audit log
-- Site settings (announcement banner, hero copy, club stats) — live, no redeploy
+**Admin Panel**
+- Full CRUD for news, games, tournaments, and team applications
+- Bracket generation from approved teams — single-elimination, auto-seeded
+- Live match score entry with VOD link support
+- User role management and immutable audit log
+- Site-wide settings (announcement banner, hero copy) — live edits, no redeploy
+
+---
+
+## Tech Stack
+
+| Concern | Choice |
+|---|---|
+| Framework | Next.js 14 (App Router, Server Components) |
+| Database / Auth / Storage | Supabase (Postgres + RLS + Realtime) |
+| Styling | Tailwind CSS + CSS custom properties |
+| Animation | GSAP · Framer Motion · Lenis |
+| Forms & Validation | React Hook Form + Zod |
+| Deployment | Vercel |
 
 ---
 
@@ -47,17 +64,17 @@ src/
 ├── app/
 │   ├── (auth)/          # Login, register
 │   ├── (public)/        # Home, news, games, tournaments, profile
-│   └── admin/           # Admin panel (role-gated)
+│   └── admin/           # Admin panel — role-gated
 ├── components/
-│   ├── ui/              # Primitives: Button, Badge, Card, Avatar, Skeleton
-│   ├── features/        # Domain components: brackets, news cards, roster, etc.
+│   ├── ui/              # Button, Badge, Card, Avatar, Skeleton
+│   ├── features/        # Domain components: brackets, news, roster, etc.
 │   └── layout/          # Header, Footer, AnnouncementBanner
 ├── lib/
 │   ├── supabase/        # client.ts · server.ts · admin.ts
 │   ├── tournament/      # Bracket generation and layout math
 │   └── audit.ts         # Audit log helper
 └── types/
-    └── supabase.ts      # Auto-generated from schema
+    └── supabase.ts      # Auto-generated from Supabase schema
 ```
 
 ---
@@ -67,106 +84,79 @@ src/
 ### Prerequisites
 
 - Node.js 18+
-- Docker (for local Supabase)
-- Supabase CLI
+- Docker (required for local Supabase)
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
 
-### Local setup
+### Setup
 
 ```bash
-# 1. Install dependencies
+# Clone and install
+git clone https://github.com/ShawSensei/eSports_club_website.git
+cd eSports_club_website
 npm install
 
-# 2. Copy env and fill in your Supabase project values
+# Configure environment
 cp .env.example .env.local
+# Fill in your Supabase project values in .env.local
 
-# 3. Start local Supabase (runs Postgres + Auth + Storage in Docker)
+# Start local Supabase (Postgres + Auth + Storage via Docker)
 supabase start
 
-# 4. Apply schema and seed data
+# Apply schema and seed sample data
 supabase db reset
 
-# 5. Generate TypeScript types from the local schema
+# Generate TypeScript types from the local schema
 supabase gen types typescript --local > src/types/supabase.ts
 
-# 6. Start the dev server
+# Start the dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Visit [http://localhost:3000](http://localhost:3000).
 
-### Environment variables
+### Environment Variables
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=          # server-side only
 NEXT_PUBLIC_SITE_URL=
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-side only — never expose it to the browser.
-
 ---
 
-## Key Commands
+## Commands
 
 ```bash
-npm run dev          # Dev server
-npm run build        # Production build
-npm run lint         # ESLint
-npm run typecheck    # TypeScript check
+npm run dev           # Dev server
+npm run build         # Production build
+npm run lint          # ESLint
+npm run typecheck     # TypeScript check
 
-supabase start       # Start local Supabase
-supabase db reset    # Wipe + reapply migrations and seed
-supabase db push     # Push local migrations to remote
+supabase start        # Start local Supabase
+supabase db reset     # Wipe + reapply migrations and seed
+supabase db push      # Push migrations to remote project
 ```
 
 ---
 
 ## Database
 
-Schema lives in `supabase/migrations/`. Core tables:
+Schema in `supabase/migrations/`. Core tables:
 
-- `profiles` — extends `auth.users` (auto-created via trigger)
-- `news_posts` — articles with category, game link, publish state
-- `games` — supported games with slug, cover, patch info
-- `tournaments` — event metadata, format, registration state
-- `tournament_teams` — team registrations per tournament
-- `matches` — individual bracket matches; Realtime-enabled for live score updates
-- `player_stats` — per-game rank and stats per user
-- `site_settings` — key/value store for all live-editable content
-- `audit_log` — immutable record of every admin/mod action
-
-Row Level Security is enabled on every table. Never disable it.
-
----
-
-## Supabase Clients
-
-Three clients — use the right one or you break RLS or cookie handling:
-
-| File | Use when |
+| Table | Purpose |
 |---|---|
-| `src/lib/supabase/client.ts` | Client Components (browser) |
-| `src/lib/supabase/server.ts` | Server Components, Server Actions, Route Handlers |
-| `src/lib/supabase/admin.ts` | Server-only ops that must bypass RLS |
+| `profiles` | Extends `auth.users` — auto-created on signup via trigger |
+| `news_posts` | Articles with category, game link, and publish state |
+| `games` | Supported games with slug, cover, and patch info |
+| `tournaments` | Event metadata, format, registration state |
+| `tournament_teams` | Team registrations per tournament |
+| `matches` | Bracket matches — Realtime-enabled for live score updates |
+| `player_stats` | Per-game rank and stats per user |
+| `site_settings` | Key/value store for all live-editable content |
+| `audit_log` | Immutable record of every admin and moderator action |
 
----
-
-## Deployment
-
-Push to `main` → Vercel auto-deploys. For schema changes:
-
-```bash
-supabase db push   # Pushes new migrations to the remote Supabase project
-```
-
-After any schema change, regenerate types:
-
-```bash
-supabase gen types typescript --project-id <your-project-id> > src/types/supabase.ts
-```
-
-Full deployment notes in `docs/DEPLOYMENT.md`.
+Row Level Security is enabled on every table.
 
 ---
 
@@ -174,14 +164,13 @@ Full deployment notes in `docs/DEPLOYMENT.md`.
 
 | File | Contents |
 |---|---|
-| `docs/DATABASE.md` | Full schema, RLS policies, triggers, indexes |
+| `docs/DATABASE.md` | Schema, RLS policies, triggers, indexes |
 | `docs/FEATURES.md` | Feature specs for every page |
-| `docs/PAGES.md` | Routing structure and data-fetching patterns |
-| `docs/COMPONENTS.md` | UI system, CSS variables, third-party packages |
+| `docs/PAGES.md` | Routing and data-fetching patterns |
+| `docs/COMPONENTS.md` | UI system, CSS variables, packages |
 | `docs/ADMIN.md` | Admin panel, audit logging, bracket management |
-| `docs/DEPLOYMENT.md` | Vercel + Supabase setup, git workflow |
-| `docs/TOURNAMENT_MODULE.md` | Bracket generation architecture and usage |
-| `PHASES.md` | Phased build plan |
+| `docs/DEPLOYMENT.md` | Vercel + Supabase setup and git workflow |
+| `docs/TOURNAMENT_MODULE.md` | Bracket generation architecture |
 
 ---
 
