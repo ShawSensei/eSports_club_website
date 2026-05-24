@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { GameTabs } from '@/components/features/games/GameTabs'
 import { TournamentTabs } from '@/components/features/tournaments/TournamentTabs'
-import { TournamentBracket } from '@/components/features/tournaments/TournamentBracket'
+import { RealTimeBracket } from '@/components/features/tournaments/RealTimeBracket'
 import { TournamentTeamsList } from '@/components/features/tournaments/TournamentTeamsList'
 import { TournamentResults } from '@/components/features/tournaments/TournamentResults'
 import { TournamentRegistrationForm } from '@/components/features/tournaments/TournamentRegistrationForm'
@@ -86,7 +86,7 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
   if (tab === 'bracket' || tab === 'results') {
     const { data } = await supabase
       .from('matches')
-      .select('id, round, match_number, team1_score, team2_score, status, vod_url, played_at, winner_id, team1:team1_id(id, team_name), team2:team2_id(id, team_name)')
+      .select('id, round, match_number, team1_score, team2_score, status, vod_url, played_at, winner_id, team1:tournament_teams!matches_team1_id_fkey(id, team_name), team2:tournament_teams!matches_team2_id_fkey(id, team_name)')
       .eq('tournament_id', params.id)
       .order('round')
       .order('match_number')
@@ -148,13 +148,35 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
         {/* Meta strip */}
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
           {tournament.start_date && (
-            <span>📅 {formatDate(tournament.start_date)}{tournament.end_date ? ` – ${formatDate(tournament.end_date)}` : ''}</span>
+            <span className="flex items-center gap-1.5">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              {formatDate(tournament.start_date)}{tournament.end_date ? ` – ${formatDate(tournament.end_date)}` : ''}
+            </span>
           )}
-          {tournament.max_teams && <span>👥 Max {tournament.max_teams} teams</span>}
-          {tournament.prize_pool && <span>🏆 {tournament.prize_pool}</span>}
+          {tournament.max_teams && (
+            <span className="flex items-center gap-1.5">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Max {tournament.max_teams} teams
+            </span>
+          )}
+          {tournament.prize_pool && (
+            <span className="flex items-center gap-1.5">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="8 6 12 2 16 6"/><line x1="12" y1="2" x2="12" y2="15"/><path d="M20 12v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5"/>
+              </svg>
+              {tournament.prize_pool}
+            </span>
+          )}
           {tournament.stream_url && (
-            <a href={tournament.stream_url} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: 'var(--accent-primary)' }}>
-              📺 Watch stream
+            <a href={tournament.stream_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:underline" style={{ color: 'var(--accent-primary)' }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+              Watch stream
             </a>
           )}
         </div>
@@ -177,7 +199,10 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
                 className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
               >
-                📄 View Rules
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                </svg>
+                View Rules
               </a>
             )}
             {tournament.registration_open && !userTeamId && user && (
@@ -187,8 +212,11 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
               </div>
             )}
             {tournament.registration_open && userTeamId && (
-              <div className="mt-8 rounded-xl p-4" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
-                <p className="font-semibold text-sm" style={{ color: 'var(--accent-success)' }}>✓ You have registered a team — awaiting approval</p>
+              <div className="mt-8 rounded-xl p-4" style={{ background: 'rgba(0,232,122,0.08)', border: '1px solid rgba(0,232,122,0.3)' }}>
+                <p className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--accent-green)' }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  You have registered a team — awaiting approval
+                </p>
               </div>
             )}
             {tournament.registration_open && !user && (
@@ -202,7 +230,7 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
         )}
 
         {tab === 'bracket' && (
-          <TournamentBracket matches={matches} teams={teams} />
+          <RealTimeBracket tournamentId={params.id} initialMatches={matches as any} />
         )}
 
         {tab === 'teams' && (

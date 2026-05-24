@@ -167,21 +167,151 @@ Good luck to all participants!',
   )
 ON CONFLICT (slug) DO NOTHING;
 
--- ── Tournament ────────────────────────────────────────────────────────────────
+-- ── Tournament captain profiles ───────────────────────────────────────────────
+INSERT INTO profiles (id, username, display_name, bio, role, discord_tag, is_active) VALUES
+  ('eeeeeeee-0001-0001-0001-eeeeeeeeeeee', 'cap_alpha',    'Striker',    'Alpha Squad IGL.',          'member', 'Striker#0001',  TRUE),
+  ('eeeeeeee-0002-0002-0002-eeeeeeeeeeee', 'cap_ghost',    'Phantom',    'Ghost Squad fragger.',      'member', 'Phantom#0002',  TRUE),
+  ('eeeeeeee-0003-0003-0003-eeeeeeeeeeee', 'cap_neon',     'Voltage',    'Neon Rush entry fragger.',  'member', 'Voltage#0003',  TRUE),
+  ('eeeeeeee-0004-0004-0004-eeeeeeeeeeee', 'cap_collect',  'Oracle',     'The Collective tactician.', 'member', 'Oracle#0004',   TRUE),
+  ('eeeeeeee-0005-0005-0005-eeeeeeeeeeee', 'cap_iron',     'Ironclad',   'Iron Fist in-game leader.', 'member', 'Ironclad#0005', TRUE),
+  ('eeeeeeee-0006-0006-0006-eeeeeeeeeeee', 'cap_shadow',   'Spectre',    'Shadow Protocol lurker.',   'member', 'Spectre#0006',  TRUE),
+  ('eeeeeeee-0007-0007-0007-eeeeeeeeeeee', 'cap_cyber',    'Byte',       'Cyber Wolves sentinel.',    'member', 'Byte#0007',     TRUE),
+  ('eeeeeeee-0008-0008-0008-eeeeeeeeeeee', 'cap_storm',    'Tempest',    'Storm Riders duelist.',     'member', 'Tempest#0008',  TRUE)
+ON CONFLICT (id) DO NOTHING;
+
+-- ── Tournaments ───────────────────────────────────────────────────────────────
 INSERT INTO tournaments (id, game_id, name, description, format, status, max_teams, prize_pool, registration_open, start_date, end_date, created_by) VALUES
   (
     'dddddddd-0001-0001-0001-dddddddddddd',
     'aaaaaaaa-0001-0001-0001-aaaaaaaaaaaa',
     'Spring 2025 VALORANT Cup',
-    'Our flagship internal VALORANT tournament. Single elimination, best-of-3 from quarterfinals.',
+    'Our flagship internal VALORANT tournament. 8 teams, single elimination, best-of-3 from semifinals. Quarterfinals are best-of-1.',
     'single_elimination',
+    'ongoing',
+    8,
+    'Gaming peripherals for the winning team',
+    FALSE,
+    NOW() - INTERVAL '2 days',
+    NOW() + INTERVAL '5 days',
+    'bbbbbbbb-0001-0001-0001-bbbbbbbbbbbb'
+  ),
+  (
+    'dddddddd-0002-0002-0002-dddddddddddd',
+    'aaaaaaaa-0002-0002-0002-aaaaaaaaaaaa',
+    'CS2 Winter League 2025',
+    'Round-robin group stage followed by a single-elimination playoff bracket. Open to all club members.',
+    'round_robin',
     'registration',
     16,
-    'Gaming peripherals for the winning team',
+    'Cash prize pool: BDT 5,000',
     TRUE,
-    NOW() + INTERVAL '12 days',
-    NOW() + INTERVAL '19 days',
+    NOW() + INTERVAL '10 days',
+    NOW() + INTERVAL '24 days',
     'bbbbbbbb-0001-0001-0001-bbbbbbbbbbbb'
+  )
+ON CONFLICT (id) DO NOTHING;
+
+-- ── Tournament teams (VALORANT Cup — 8 approved) ──────────────────────────────
+INSERT INTO tournament_teams (id, tournament_id, team_name, captain_id, status, registered_at) VALUES
+  ('ffffffff-0001-0001-0001-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Alpha Squad',      'eeeeeeee-0001-0001-0001-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '5 days'),
+  ('ffffffff-0002-0002-0002-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Ghost Squad',      'eeeeeeee-0002-0002-0002-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '5 days'),
+  ('ffffffff-0003-0003-0003-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Neon Rush',        'eeeeeeee-0003-0003-0003-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '4 days'),
+  ('ffffffff-0004-0004-0004-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'The Collective',   'eeeeeeee-0004-0004-0004-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '4 days'),
+  ('ffffffff-0005-0005-0005-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Iron Fist',        'eeeeeeee-0005-0005-0005-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '4 days'),
+  ('ffffffff-0006-0006-0006-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Shadow Protocol',  'eeeeeeee-0006-0006-0006-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '3 days'),
+  ('ffffffff-0007-0007-0007-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Cyber Wolves',     'eeeeeeee-0007-0007-0007-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '3 days'),
+  ('ffffffff-0008-0008-0008-ffffffffffff', 'dddddddd-0001-0001-0001-dddddddddddd', 'Storm Riders',     'eeeeeeee-0008-0008-0008-eeeeeeeeeeee', 'approved', NOW() - INTERVAL '3 days')
+ON CONFLICT (id) DO NOTHING;
+
+-- ── Matches — Spring 2025 VALORANT Cup ────────────────────────────────────────
+-- Seeding: 1vBye→→ standard bracket: R1: 1v8, 4v5, 2v7, 3v6
+-- R1 results: Alpha 13-8, Collective 13-10, Ghost 13-7, Neon 13-11
+-- R2: Alpha vs Collective (LIVE), Ghost vs Neon (scheduled)
+-- Final: TBD (scheduled, no teams yet)
+
+INSERT INTO matches (id, tournament_id, round, match_number, team1_id, team2_id, team1_score, team2_score, winner_id, status, played_at, vod_url) VALUES
+  -- Round 1 (completed)
+  (
+    'mmmmmmmm-0001-0001-0001-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    1, 1,
+    'ffffffff-0001-0001-0001-ffffffffffff',  -- Alpha Squad (seed 1)
+    'ffffffff-0008-0008-0008-ffffffffffff',  -- Storm Riders (seed 8)
+    13, 8,
+    'ffffffff-0001-0001-0001-ffffffffffff',  -- Alpha Squad wins
+    'completed',
+    NOW() - INTERVAL '1 day 6 hours',
+    NULL
+  ),
+  (
+    'mmmmmmmm-0002-0002-0002-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    1, 2,
+    'ffffffff-0004-0004-0004-ffffffffffff',  -- The Collective (seed 4)
+    'ffffffff-0005-0005-0005-ffffffffffff',  -- Iron Fist (seed 5)
+    13, 10,
+    'ffffffff-0004-0004-0004-ffffffffffff',  -- The Collective wins
+    'completed',
+    NOW() - INTERVAL '1 day 5 hours',
+    NULL
+  ),
+  (
+    'mmmmmmmm-0003-0003-0003-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    1, 3,
+    'ffffffff-0002-0002-0002-ffffffffffff',  -- Ghost Squad (seed 2)
+    'ffffffff-0007-0007-0007-ffffffffffff',  -- Cyber Wolves (seed 7)
+    13, 7,
+    'ffffffff-0002-0002-0002-ffffffffffff',  -- Ghost Squad wins
+    'completed',
+    NOW() - INTERVAL '1 day 4 hours',
+    NULL
+  ),
+  (
+    'mmmmmmmm-0004-0004-0004-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    1, 4,
+    'ffffffff-0003-0003-0003-ffffffffffff',  -- Neon Rush (seed 3)
+    'ffffffff-0006-0006-0006-ffffffffffff',  -- Shadow Protocol (seed 6)
+    13, 11,
+    'ffffffff-0003-0003-0003-ffffffffffff',  -- Neon Rush wins
+    'completed',
+    NOW() - INTERVAL '1 day 3 hours',
+    NULL
+  ),
+  -- Round 2 (semifinal)
+  (
+    'mmmmmmmm-0005-0005-0005-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    2, 1,
+    'ffffffff-0001-0001-0001-ffffffffffff',  -- Alpha Squad
+    'ffffffff-0004-0004-0004-ffffffffffff',  -- The Collective
+    NULL, NULL, NULL,
+    'live',
+    NULL,
+    NULL
+  ),
+  (
+    'mmmmmmmm-0006-0006-0006-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    2, 2,
+    'ffffffff-0002-0002-0002-ffffffffffff',  -- Ghost Squad
+    'ffffffff-0003-0003-0003-ffffffffffff',  -- Neon Rush
+    NULL, NULL, NULL,
+    'scheduled',
+    NULL,
+    NULL
+  ),
+  -- Round 3 (final) — teams TBD
+  (
+    'mmmmmmmm-0007-0007-0007-mmmmmmmmmmmm',
+    'dddddddd-0001-0001-0001-dddddddddddd',
+    3, 1,
+    NULL, NULL,
+    NULL, NULL, NULL,
+    'scheduled',
+    NULL,
+    NULL
   )
 ON CONFLICT (id) DO NOTHING;
 

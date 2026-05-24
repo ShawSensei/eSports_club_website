@@ -160,6 +160,103 @@ export async function reviewTeam(
   return { success: true }
 }
 
+// ─── Bracket generation ───────────────────────────────────────────────────────
+
+export async function generateBracket(tournamentId: string): Promise<ActionResult> {
+  const { supabase, user } = await requireMod()
+
+  // Load approved teams ordered by registration time (used as seeding order)
+  const { data: teamsData, error: teamsErr } = await supabase
+    .from('tournament_teams')
+    .select('id, team_name')
+    .eq('tournament_id', tournamentId)
+    .eq('status', 'approved')
+    .order('registered_at')
+
+  if (teamsErr) return { error: teamsErr.message }
+  const teams = (teamsData ?? []) as { id: string; team_name: string }[]
+  if (teams.length < 2) return { error: 'Need at least 2 approved teams to generate a bracket.' }
+
+  // Load format
+  const { data: t } = await supabase
+    .from('tournaments')
+    .select('format')
+    .eq('id', tournamentId)
+    .single<{ format: string }>()
+
+  const { generateSingleElim, generateRoundRobin } = await import('@/lib/tournament/bracket')
+  const format  = t?.format ?? 'single_elimination'
+  const matches = format === 'round_robin'
+    ? generateRoundRobin(teams)
+    : generateSingleElim(teams)
+
+  // Wipe existing matches first
+  await supabase.from('matches').delete().eq('tournament_id', tournamentId)
+
+  const { error } = await (supabase as any).from('matches').insert(
+    matches.map(m => ({
+      tournament_id: tournamentId,
+      round:         m.round,
+      match_number:  m.match_number,
+      team1_id:      m.team1_id,
+      team2_id:      m.team2_id,
+      status:        'scheduled',
+    }))
+  )
+  if (error) return { error: error.message }
+
+  await logAudit(user.id, 'tournament.bracket_generated', 'tournament', tournamentId, { teams: teams.length, format })
+  revalidatePath(`/admin/tournaments/${tournamentId}`)
+  revalidatePath(`/tournaments/${tournamentId}`)
+  return { success: true }
+}
+
+// ─── Match status ─────────────────────────────────────────────────────────────
+
+export async function setMatchStatus(
+  matchId: string,
+  tournamentId: string,
+  status: 'scheduled' | 'live' | 'completed' | 'forfeit'
+): Promise<ActionResult> {
+  const { supabase, user } = await requireMod()
+
+  const { error } = await (supabase as any)
+    .from('matches')
+    .update({ status })
+    .eq('id', matchId)
+
+  if (error) return { error: error.message }
+
+  await logAudit(user.id, `match.set_${status}`, 'match', matchId)
+  revalidatePath(`/admin/tournaments/${tournamentId}`)
+  revalidatePath(`/tournaments/${tournamentId}`)
+  return { success: true }
+}
+
+// ─── VOD URL ──────────────────────────────────────────────────────────────────
+
+export async function updateVodUrl(
+  matchId: string,
+  tournamentId: string,
+  vodUrl: string | null
+): Promise<ActionResult> {
+  const { supabase, user } = await requireMod()
+
+  const { error } = await (supabase as any)
+    .from('matches')
+    .update({ vod_url: vodUrl })
+    .eq('id', matchId)
+
+  if (error) return { error: error.message }
+
+  await logAudit(user.id, 'match.vod_updated', 'match', matchId)
+  revalidatePath(`/admin/tournaments/${tournamentId}`)
+  revalidatePath(`/tournaments/${tournamentId}`)
+  return { success: true }
+}
+
+// ─── Score update ─────────────────────────────────────────────────────────────
+
 export async function updateMatchScore(matchId: string, tournamentId: string, formData: FormData): Promise<ActionResult> {
   const { supabase, user } = await requireMod()
 
